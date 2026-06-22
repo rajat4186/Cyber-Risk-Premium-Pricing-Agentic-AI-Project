@@ -1,1 +1,398 @@
+"""
+Data Cleaning and Validation Agent
+Capstone Project
 
+Purpose:
+- Load CSV files
+- Validate data quality
+- Clean common issues
+- Generate validation report
+- Save cleaned dataset
+"""
+
+import pandas as pd
+import numpy as np
+import os
+
+
+class DataValidationAgent:
+
+    def __init__(self):
+        self.report = []
+
+    # --------------------------------------------------
+    # Load Dataset
+    # --------------------------------------------------
+
+    def load_data(self, data):
+
+        try:
+
+            df = pd.read_csv(data)
+
+            self.report.append(
+                f"Dataset loaded successfully: {data}"
+            )
+
+            return df
+
+        except Exception as e:
+
+            self.report.append(
+                f"Error loading dataset: {e}"
+            )
+
+            return None
+
+    # --------------------------------------------------
+    # Missing Values Check
+    # --------------------------------------------------
+
+    def check_missing_values(self, df):
+
+        missing = df.isnull().sum()
+
+        self.report.append("\n=== Missing Values ===")
+
+        for col, count in missing.items():
+
+            if count > 0:
+
+                self.report.append(
+                    f"{col}: {count}"
+                )
+
+        return missing
+
+    # --------------------------------------------------
+    # Handle Missing Values
+    # --------------------------------------------------
+
+    def clean_missing_values(self, df):
+
+        numeric_columns = df.select_dtypes(
+            include=np.number
+        ).columns
+
+        for col in numeric_columns:
+
+            df[col] = df[col].fillna(
+                df[col].median()
+            )
+
+        text_columns = df.select_dtypes(
+            include="object"
+        ).columns
+
+        for col in text_columns:
+
+            df[col] = df[col].fillna(
+                "Unknown"
+            )
+
+        self.report.append(
+            "\nMissing values cleaned."
+        )
+
+        return df
+
+    # --------------------------------------------------
+    # Duplicate Check
+    # --------------------------------------------------
+
+    def check_duplicates(self, df):
+
+        duplicates = df.duplicated().sum()
+
+        self.report.append(
+            f"\nDuplicate Rows Found: {duplicates}"
+        )
+
+        return duplicates
+
+    # --------------------------------------------------
+    # Remove Duplicates
+    # --------------------------------------------------
+
+    def remove_duplicates(self, df):
+
+        before = len(df)
+
+        df = df.drop_duplicates()
+
+        after = len(df)
+
+        removed = before - after
+
+        self.report.append(
+            f"Duplicate Rows Removed: {removed}"
+        )
+
+        return df
+
+    # --------------------------------------------------
+    # Numeric Validation
+    # --------------------------------------------------
+
+    def validate_numeric_columns(
+        self,
+        df,
+        numeric_columns
+    ):
+
+        self.report.append(
+            "\n=== Numeric Validation ==="
+        )
+
+        for col in numeric_columns:
+
+            if col in df.columns:
+
+                invalid = pd.to_numeric(
+                    df[col],
+                    errors="coerce"
+                ).isna().sum()
+
+                self.report.append(
+                    f"{col}: {invalid} invalid values"
+                )
+
+                df[col] = pd.to_numeric(
+                    df[col],
+                    errors="coerce"
+                )
+
+        return df
+
+    # --------------------------------------------------
+    # Range Checks
+    # --------------------------------------------------
+
+    def range_checks(
+        self,
+        df,
+        numeric_columns
+    ):
+
+        self.report.append(
+            "\n=== Range Checks ==="
+        )
+
+        for col in numeric_columns:
+
+            if col in df.columns:
+
+                negatives = (
+                    df[col] < 0
+                ).sum()
+
+                self.report.append(
+                    f"{col}: {negatives} negative values"
+                )
+
+    # --------------------------------------------------
+    # Date Validation
+    # --------------------------------------------------
+
+    def validate_dates(
+        self,
+        df,
+        date_columns
+    ):
+
+        self.report.append(
+            "\n=== Date Validation ==="
+        )
+
+        for col in date_columns:
+
+            if col in df.columns:
+
+                converted = pd.to_datetime(
+                    df[col],
+                    errors="coerce"
+                )
+
+                invalid = (
+                    converted.isna().sum()
+                )
+
+                self.report.append(
+                    f"{col}: {invalid} invalid dates"
+                )
+
+                df[col] = converted
+
+        return df
+
+    # --------------------------------------------------
+    # Business Rules
+    # --------------------------------------------------
+
+    def business_rules(self, df):
+
+        self.report.append(
+            "\n=== Business Rules ==="
+        )
+
+        if (
+            "incident_date" in df.columns
+            and "disclosure_date" in df.columns
+        ):
+
+            invalid_dates = (
+                df["disclosure_date"]
+                < df["incident_date"]
+            ).sum()
+
+            self.report.append(
+                f"Disclosure before Incident: {invalid_dates}"
+            )
+
+        if "employee_count" in df.columns:
+
+            invalid_emp = (
+                df["employee_count"] <= 0
+            ).sum()
+
+            self.report.append(
+                f"Invalid Employee Counts: {invalid_emp}"
+            )
+
+    # --------------------------------------------------
+    # Data Quality Score
+    # --------------------------------------------------
+
+    def quality_score(self, df):
+
+        score = 100
+
+        missing = df.isnull().sum().sum()
+
+        duplicates = df.duplicated().sum()
+
+        score -= min(missing, 20)
+
+        score -= min(duplicates, 10)
+
+        score = max(score, 0)
+
+        self.report.append(
+            f"\nData Quality Score: {score}/100"
+        )
+
+    # --------------------------------------------------
+    # Save Clean Dataset
+    # --------------------------------------------------
+
+    def save_clean_dataset(
+        self,
+        df,
+        output_path
+    ):
+
+        df.to_csv(
+            output_path,
+            index=False
+        )
+
+        self.report.append(
+            f"\nClean dataset saved to:"
+        )
+
+        self.report.append(output_path)
+
+    # --------------------------------------------------
+    # Generate Report
+    # --------------------------------------------------
+
+    def generate_report(self):
+
+        print("\n".join(self.report))
+
+    # --------------------------------------------------
+    # Main Run Function
+    # --------------------------------------------------
+
+    def run(
+        self,
+        input_file,
+        output_file
+    ):
+
+        df = self.load_data(input_file)
+
+        if df is None:
+
+            return
+
+        numeric_columns = [
+            "employee_count",
+            "company_revenue_usd",
+            "direct_loss_usd",
+            "ransom_demanded_usd",
+            "ransom_paid_usd",
+            "recovery_cost_usd",
+            "legal_fees_usd",
+            "regulatory_fine_usd",
+            "insurance_payout_usd",
+            "total_loss_usd",
+            "downtime_hours",
+            "market_cap_at_disclosure"
+        ]
+
+        date_columns = [
+            "incident_date",
+            "discovery_date",
+            "disclosure_date",
+            "created_at",
+            "updated_at"
+        ]
+
+        self.check_missing_values(df)
+
+        df = self.clean_missing_values(df)
+
+        self.check_duplicates(df)
+
+        df = self.remove_duplicates(df)
+
+        df = self.validate_numeric_columns(
+            df,
+            numeric_columns
+        )
+
+        self.range_checks(
+            df,
+            numeric_columns
+        )
+
+        df = self.validate_dates(
+            df,
+            date_columns
+        )
+
+        self.business_rules(df)
+
+        self.quality_score(df)
+
+        self.save_clean_dataset(
+            df,
+            output_file
+        )
+
+        self.generate_report()
+
+
+# --------------------------------------------------
+# Example Usage
+# --------------------------------------------------
+
+if __name__ == "__main__":
+
+    agent = DataValidationAgent()
+
+    agent.run(
+        input_file="data/incident_master.csv",
+        output_file="outputs/cleaned_incident_company.csv"
+    )
