@@ -361,29 +361,49 @@ if __name__ == "__main__":
 
     agent = DataValidationAgent()
 
-    # --- 1. Process Incidents File ---
+    # --- 1. Process financial_impact.csv ---
+    agent.run(
+        input_file="data/financial_impact.csv",
+        output_file="data/cleaned_financial_impact.csv",
+        numeric_columns=[
+            "direct_loss_usd", "ransom_demanded_usd", "ransom_paid_usd", 
+            "recovery_cost_usd", "legal_fees_usd", "regulatory_fine_usd", 
+            "insurance_payout_usd", "total_loss_usd", "total_loss_lower_bound", 
+            "total_loss_upper_bound", "inflation_adjusted_usd", "cpi_index_used"
+        ],
+        date_columns=["created_at", "updated_at"]
+    )
+
+    # --- 2. Process incidents_master.csv ---
     agent.run(
         input_file="data/incidents_master.csv",
         output_file="data/cleaned_incidents_master.csv",
-        numeric_columns=["employee_count"],
-        date_columns=["incident_date", "disclosure_date"]
+        numeric_columns=[
+            "company_revenue_usd", "employee_count", "data_compromised_records", 
+            "downtime_hours", "quality_score"
+        ],
+        date_columns=[
+            "incident_date", "discovery_date", "disclosure_date", 
+            "created_at", "updated_at"
+        ]
     )
 
-    # --- 2. Process Losses File ---
+    # --- 3. Process market_impact.csv ---
     agent.run(
-        input_file="data/losses.csv",
-        output_file="data/cleaned_losses.csv",
-        numeric_columns=["direct_loss_usd", "total_loss_usd", "recovery_cost_usd"],
-        date_columns=[]
+        input_file="data/market_impact.csv",
+        output_file="data/cleaned_market_impact.csv",
+        numeric_columns=[
+            "price_7d_before", "price_disclosure_day", "price_1d_after", 
+            "price_7d_after", "price_30d_after", "volume_avg_30d_baseline", 
+            "volume_disclosure_day", "sector_return_same_period", "abnormal_return_1d", 
+            "abnormal_return_7d", "abnormal_return_30d", "car_neg1_to_pos1", 
+            "car_0_to_7", "car_0_to_30", "car_0_to_90", "t_statistic_1d", 
+            "p_value_1d", "t_statistic_30d", "p_value_30d", "market_cap_at_disclosure", 
+            "volume_ratio_disclosure", "pre_incident_volatility_30d", 
+            "post_incident_volatility_30d", "days_to_price_recovery"
+        ],
+        date_columns=["created_at", "updated_at"]
     )
 
-    # --- 3. Process Market File ---
-    agent.run(
-        input_file="data/market.csv",
-        output_file="data/cleaned_market.csv",
-        numeric_columns=["company_revenue_usd", "market_cap_at_disclosure"],
-        date_columns=[]
-    )
-
-    # Output the cumulative pipeline results to the console log
+    # Print the aggregated report across all processing cycles
     agent.generate_report()
