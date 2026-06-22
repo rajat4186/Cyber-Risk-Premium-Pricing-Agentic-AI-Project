@@ -24,14 +24,14 @@ class DataValidationAgent:
     # Load Dataset
     # --------------------------------------------------
 
-    def load_data(self, data):
+    def load_data(self, file_path):
 
         try:
 
-            df = pd.read_csv(data)
+            df = pd.read_csv(file_path)
 
             self.report.append(
-                f"Dataset loaded successfully: {data}"
+                f"\nDataset loaded successfully: {file_path}"
             )
 
             return df
@@ -39,7 +39,7 @@ class DataValidationAgent:
         except Exception as e:
 
             self.report.append(
-                f"Error loading dataset: {e}"
+                f"Error loading dataset {file_path}: {e}"
             )
 
             return None
@@ -52,7 +52,7 @@ class DataValidationAgent:
 
         missing = df.isnull().sum()
 
-        self.report.append("\n=== Missing Values ===")
+        self.report.append("=== Missing Values ===")
 
         for col, count in missing.items():
 
@@ -91,7 +91,7 @@ class DataValidationAgent:
             )
 
         self.report.append(
-            "\nMissing values cleaned."
+            "Missing values cleaned."
         )
 
         return df
@@ -105,7 +105,7 @@ class DataValidationAgent:
         duplicates = df.duplicated().sum()
 
         self.report.append(
-            f"\nDuplicate Rows Found: {duplicates}"
+            f"Duplicate Rows Found: {duplicates}"
         )
 
         return duplicates
@@ -141,7 +141,7 @@ class DataValidationAgent:
     ):
 
         self.report.append(
-            "\n=== Numeric Validation ==="
+            "=== Numeric Validation ==="
         )
 
         for col in numeric_columns:
@@ -175,7 +175,7 @@ class DataValidationAgent:
     ):
 
         self.report.append(
-            "\n=== Range Checks ==="
+            "=== Range Checks ==="
         )
 
         for col in numeric_columns:
@@ -201,7 +201,7 @@ class DataValidationAgent:
     ):
 
         self.report.append(
-            "\n=== Date Validation ==="
+            "=== Date Validation ==="
         )
 
         for col in date_columns:
@@ -232,7 +232,7 @@ class DataValidationAgent:
     def business_rules(self, df):
 
         self.report.append(
-            "\n=== Business Rules ==="
+            "=== Business Rules ==="
         )
 
         if (
@@ -278,7 +278,7 @@ class DataValidationAgent:
         score = max(score, 0)
 
         self.report.append(
-            f"\nData Quality Score: {score}/100"
+            f"Data Quality Score: {score}/100"
         )
 
     # --------------------------------------------------
@@ -291,16 +291,17 @@ class DataValidationAgent:
         output_path
     ):
 
+        # Safely generate target folder structure if it doesn't exist
+        os.makedirs(os.path.dirname(output_path), exist_ok=True)
+        
         df.to_csv(
             output_path,
             index=False
         )
 
         self.report.append(
-            f"\nClean dataset saved to:"
+            f"Clean dataset saved to: {output_path}"
         )
-
-        self.report.append(output_path)
 
     # --------------------------------------------------
     # Generate Report
@@ -317,82 +318,72 @@ class DataValidationAgent:
     def run(
         self,
         input_file,
-        output_file
+        output_file,
+        numeric_columns=None,
+        date_columns=None
     ):
 
         df = self.load_data(input_file)
 
         if df is None:
-
             return
 
-        numeric_columns = [
-            "employee_count",
-            "company_revenue_usd",
-            "direct_loss_usd",
-            "ransom_demanded_usd",
-            "ransom_paid_usd",
-            "recovery_cost_usd",
-            "legal_fees_usd",
-            "regulatory_fine_usd",
-            "insurance_payout_usd",
-            "total_loss_usd",
-            "downtime_hours",
-            "market_cap_at_disclosure"
-        ]
+        # Default to empty lists if nothing is supplied
+        numeric_columns = numeric_columns if numeric_columns else []
+        date_columns = date_columns if date_columns else []
 
-        date_columns = [
-            "incident_date",
-            "discovery_date",
-            "disclosure_date",
-            "created_at",
-            "updated_at"
-        ]
-
+        # 1. Identify raw issues and duplicates first
         self.check_missing_values(df)
-
-        df = self.clean_missing_values(df)
-
         self.check_duplicates(df)
-
         df = self.remove_duplicates(df)
 
-        df = self.validate_numeric_columns(
-            df,
-            numeric_columns
-        )
+        # 2. Re-format and validate metrics (coerces string errors into NaNs)
+        df = self.validate_numeric_columns(df, numeric_columns)
+        self.range_checks(df, numeric_columns)
+        df = self.validate_dates(df, date_columns)
 
-        self.range_checks(
-            df,
-            numeric_columns
-        )
-
-        df = self.validate_dates(
-            df,
-            date_columns
-        )
-
+        # 3. Check custom contextual business logic
         self.business_rules(df)
 
+        # 4. Clean up all missing values (including structural ones generated above)
+        df = self.clean_missing_values(df)
+
+        # 5. Conclude evaluation metrics and serialize out
         self.quality_score(df)
-
-        self.save_clean_dataset(
-            df,
-            output_file
-        )
-
-        self.generate_report()
+        self.save_clean_dataset(df, output_file)
 
 
 # --------------------------------------------------
-# Example Usage
+# Execution Target Block
 # --------------------------------------------------
 
 if __name__ == "__main__":
 
     agent = DataValidationAgent()
 
+    # --- 1. Process Incidents File ---
     agent.run(
-        input_file="data/incident_master.csv",
-        output_file="outputs/cleaned_incident_company.csv"
+        input_file="data/incidents_master.csv",
+        output_file="data/cleaned_incidents_master.csv",
+        numeric_columns=["employee_count"],
+        date_columns=["incident_date", "disclosure_date"]
     )
+
+    # --- 2. Process Losses File ---
+    agent.run(
+        input_file="data/losses.csv",
+        output_file="data/cleaned_losses.csv",
+        numeric_columns=["direct_loss_usd", "total_loss_usd", "recovery_cost_usd"],
+        date_columns=[]
+    )
+
+    # --- 3. Process Market File ---
+    agent.run(
+        input_file="data/market.csv",
+        output_file="data/cleaned_market.csv",
+        numeric_columns=["company_revenue_usd", "market_cap_at_disclosure"],
+        date_columns=[]
+    )
+
+    # Output the cumulative pipeline results to the console log
+    agent.generate_report()
