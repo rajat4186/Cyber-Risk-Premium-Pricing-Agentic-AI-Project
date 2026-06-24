@@ -2,55 +2,51 @@ import os
 import ast
 import glob
 import json
+import time  # Handles rate limits for the free tier
 import numpy as np
 import pandas as pd
-from openai import OpenAI
+from google import genai
+from google.genai import types
 
-# Initialize the OpenAI Client
-client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
+# Initialize the Gemini Client
+client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
 
 class FullyAgenticValidator:
-    def __init__(self, model="gpt-4o-mini"):
+    def __init__(self, model="gemini-2.5-flash"):
         self.model = model
 
     def _call_llm(self, prompt, system_prompt="You are an expert data science agent."):
-        """Helper to guarantee clean, structured string responses from the LLM."""
+        """Helper to guarantee clean string responses from Gemini."""
         try:
-            response = client.chat.completions.create(
+            response = client.models.generate_content(
                 model=self.model,
-                messages=[
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": prompt}
-                ],
-                temperature=0.0 # Force objective reasoning
+                contents=prompt,
+                config=types.GenerateContentConfig(
+                    system_instruction=system_prompt,
+                    temperature=0.0
+                )
             )
-            return response.choices[0].message.content.strip()
+            return response.text.strip()
         except Exception as e:
             print(f"❌ API Call Error: {e}")
             return None
 
     def profile_and_plan(self, file_path):
-        """
-        STAGE 1: COGNITIVE INSPECTION & STRATEGY PLANNING
-        The agent dynamically reviews data types, distributions, missing rates,
-        and asks the LLM to choose the mathematically optimal imputation strategy.
-        """
+        """STAGE 1: COGNITIVE INSPECTION & STRATEGY PLANNING"""
         df = pd.read_csv(file_path)
         print(f"\n🕵️‍♂️ Analyzing structural anomalies for: {os.path.basename(file_path)}...")
 
-        # Construct a structural profile of the data to feed the LLM's brain
         data_profile = {}
         for col in df.columns:
             missing_count = int(df[col].isnull().sum())
             missing_pct = (missing_count / len(df)) * 100
             unique_count = int(df[col].nunique())
-            sample_vals = df[col].dropna().head(3).tolist()
+            sample_vals = df[col].dropna().head(3).astype(str).tolist()
 
             if pd.api.types.is_numeric_dtype(df[col]):
                 col_type = "numeric"
-                # Calculate skewness to help the LLM decide between Mean or Median
                 skew = df[col].skew() if len(df[col].dropna()) > 2 else 0
-                stats = {"skew": round(skew, 2), "min": float(df[col].min()), "max": float(df[col].max())}
+                stats = {"skew": round(float(skew), 2) if not pd.isna(skew) else 0, "min": float(df[col].min()), "max": float(df[col].max())}
             else:
                 col_type = "text/categorical"
                 stats = {}
@@ -69,10 +65,10 @@ class FullyAgenticValidator:
 
         Tasks:
         1. Classify each column strictly into 'text_processing' or 'numeric_processing'.
-        2. For numeric columns with missing data (missing_pct > 0), choose the mathematically superior imputation strategy ('mean', 'median', or 'zero') based on the context, samples, and skewness metrics (highly skewed data should use median; normally distributed can use mean).
+        2. For numeric columns with missing data (missing_pct > 0), choose the mathematically superior imputation strategy ('mean', 'median', or 'zero') based on the context, samples, and skewness metrics.
         3. For text columns, determine if they look like categorical/name data that requires spelling standardisation ('spell_check': true/false).
 
-        Return strictly a valid JSON object matching this structure exactly. Do not include markdown wraps or code blocks.
+        Return strictly a valid JSON object matching this structure exactly. Do not include markdown wraps.
         {{
           "columns": {{
              "column_name_1": {{"action": "numeric_processing", "impute_strategy": "median"}},
@@ -81,7 +77,10 @@ class FullyAgenticValidator:
         }}
         """
         
-        raw_plan = self._call_llm(prompt, "You output raw, valid JSON maps only.")
+        raw_plan = self._call_llm(prompt, "You output raw, valid JSON maps only. No markdown formatting.")
+        if raw_plan and raw_plan.startswith("```"):
+            raw_plan = raw_plan.strip("```json").strip("```").strip()
+            
         try:
             return json.loads(raw_plan)["columns"]
         except Exception:
@@ -90,7 +89,6 @@ class FullyAgenticValidator:
 
     def clean_numeric(self, df, col, strategy):
         """STAGE 2A: DETERMINISTIC NUMERIC CLEANING & STRATEGIC IMPUTATION"""
-        # Force strip any accidental text/currency characters out of numeric vectors
         if df[col].dtype == object:
             df[col] = df[col].astype(str).str.replace(r'[^\d\.]', '', regex=True)
             df[col] = pd.to_numeric(df[col], errors='coerce')
@@ -103,23 +101,19 @@ class FullyAgenticValidator:
             else:
                 fill_value = 0
             
-            # Handle empty edge case
             if pd.isna(fill_value): fill_value = 0
             df[col] = df[col].fillna(fill_value)
             print(f"   🔢 Filled missing rows in '{col}' using calculated {strategy} ({round(fill_value, 2)})")
         return df
 
     def clean_text_with_reflection(self, df, col):
-        """STAGE 2B: AGENTIC TEXT STANDARDIZATION & Deduplication WITH CRITICAL SELF-REFLECTION"""
-        # Rapid programmatic syntax sanitization
+        """STAGE 2B: AGENTIC TEXT STANDARDIZATION WITH SELF-REFLECTION"""
         df[col] = df[col].astype(str).str.strip().str.replace(r'\s+', ' ', regex=True)
         unique_dirty = df[col].dropna().unique().tolist()
 
-        # Edge safeguard: ignore columns containing unique high-cardinality values like raw IDs
         if not unique_dirty or len(unique_dirty) > 80:
             return df
 
-        # Step 1: Mapping Generation
         gen_prompt = f"""
         Analyze these unique raw string terms from the database column '{col}':
         {unique_dirty}
@@ -127,27 +121,29 @@ class FullyAgenticValidator:
         Instructions:
         - Correct typos and spelling errors.
         - Convert all records to strict Title Case capitalization.
-        - Merge duplicate variations of identical business entities (e.g. 'Apple Inc.', 'apple inc', and 'Apple Corp' -> 'Apple Inc.').
+        - Merge duplicate variations of identical business entities.
 
-        Return ONLY a Python dictionary mapping raw terms to cleaned terms. No prose.
+        Return ONLY a Python dictionary mapping raw terms to cleaned terms. No markdown formatting or prose.
         Format: {{"old_string": "New Clean String"}}
         """
         try:
             raw_map = self._call_llm(gen_prompt)
+            if raw_map and raw_map.startswith("```"):
+                raw_map = raw_map.strip("```python").strip("```json").strip("```").strip()
             cleaning_map = ast.literal_eval(raw_map)
 
-            # Step 2: The Agentic Self-Reflection Audit Loop
             reflect_prompt = f"""
             Review this proposed translation dictionary built for data cleaning:
             {cleaning_map}
 
-            Act as an unyielding data auditor. Ensure the keys did not have their core semantic business identities swapped mistakenly (e.g., changing 'Gogle' to 'Google' is correct, but changing 'AIG Insurance' to 'Chubb Insurance' is a severe identity error).
-            
+            Act as an unyielding data auditor. Ensure the keys did not have their core semantic business identities swapped mistakenly.
             Identify any invalid or highly dangerous keys. Return ONLY a valid Python list of strings containing the keys that must be REJECTED.
             Format: ["bad_key_1"]
             If all changes look perfectly safe, return an empty list: []
             """
             raw_reflection = self._call_llm(reflect_prompt)
+            if raw_reflection and raw_reflection.startswith("```"):
+                raw_reflection = raw_reflection.strip("```python").strip("```json").strip("```").strip()
             rejected_keys = ast.literal_eval(raw_reflection)
 
             if rejected_keys:
@@ -170,14 +166,14 @@ class FullyAgenticValidator:
             
             action = specifications.get("action")
             if action == "numeric_processing":
-                strategy = specifications.get("impute_strategy", "median")
-                df = self.clean_numeric(df, col, strategy)
+                df = self.clean_numeric(df, col, specifications.get("impute_strategy", "median"))
             elif action == "text_processing":
                 if specifications.get("spell_check", True):
                     print(f"   🔤 Deploying spellcheck and deduplication loop on '{col}'...")
                     df = self.clean_text_with_reflection(df, col)
+                    # 🕒 Rate Limit Safety: Sleep 4 seconds between text columns to stay under 15 RPM
+                    time.sleep(4) 
 
-        # Export refined data asset
         output_dir = os.path.dirname(target_file_path)
         base_name = os.path.basename(target_file_path).replace(".csv", "_cleaned.csv")
         final_output_path = os.path.join(output_dir, base_name)
@@ -186,26 +182,18 @@ class FullyAgenticValidator:
         print(f"💾 Saved fully validated asset to: {final_output_path}")
 
 if __name__ == "__main__":
-    # 1. Initialize your agent
     agent = FullyAgenticValidator()
-    
-    # 2. Automatically find ALL CSV files inside your data folder
     data_folder = "data"
     csv_files = glob.glob(os.path.join(data_folder, "*.csv"))
-    
-    # Filter out files that have already been cleaned so we don't loop infinitely
     files_to_clean = [f for f in csv_files if "_cleaned" not in f]
     
     if not files_to_clean:
         print(f"🤷‍♂️ No raw CSV files found to process in '{data_folder}'!")
     else:
         print(f"🤖 Found {len(files_to_clean)} files. Starting batch agentic validation...")
-        
-        # 3. Loop through every single file and execute the pipeline
         for file_path in files_to_clean:
             print(f"\n==========================================")
             print(f"🔄 Processing Next File: {file_path}")
             print(f"==========================================")
             agent.execute_agent_pipeline(file_path)
-            
         print("\n🎉 All datasets have been successfully processed by the agent!")
