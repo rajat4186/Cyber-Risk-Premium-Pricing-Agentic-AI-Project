@@ -1,409 +1,211 @@
-"""
-Data Cleaning and Validation Agent
-Capstone Project
-
-Purpose:
-- Load CSV files
-- Validate data quality
-- Clean common issues
-- Generate validation report
-- Save cleaned dataset
-"""
-
-import pandas as pd
-import numpy as np
 import os
+import ast
+import glob
+import json
+import numpy as np
+import pandas as pd
+from openai import OpenAI
 
+# Initialize the OpenAI Client
+client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 
-class DataValidationAgent:
+class FullyAgenticValidator:
+    def __init__(self, model="gpt-4o-mini"):
+        self.model = model
 
-    def __init__(self):
-        self.report = []
-
-    # --------------------------------------------------
-    # Load Dataset
-    # --------------------------------------------------
-
-    def load_data(self, file_path):
-
+    def _call_llm(self, prompt, system_prompt="You are an expert data science agent."):
+        """Helper to guarantee clean, structured string responses from the LLM."""
         try:
-
-            df = pd.read_csv(file_path)
-
-            self.report.append(
-                f"\nDataset loaded successfully: {file_path}"
+            response = client.chat.completions.create(
+                model=self.model,
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": prompt}
+                ],
+                temperature=0.0 # Force objective reasoning
             )
-
-            return df
-
+            return response.choices[0].message.content.strip()
         except Exception as e:
-
-            self.report.append(
-                f"Error loading dataset {file_path}: {e}"
-            )
-
+            print(f"❌ API Call Error: {e}")
             return None
 
-    # --------------------------------------------------
-    # Missing Values Check
-    # --------------------------------------------------
-
-    def check_missing_values(self, df):
-
-        missing = df.isnull().sum()
-
-        self.report.append("=== Missing Values ===")
-
-        for col, count in missing.items():
-
-            if count > 0:
-
-                self.report.append(
-                    f"{col}: {count}"
-                )
-
-        return missing
-
-    # --------------------------------------------------
-    # Handle Missing Values
-    # --------------------------------------------------
-
-    def clean_missing_values(self, df):
-
-        numeric_columns = df.select_dtypes(
-            include=np.number
-        ).columns
-
-        for col in numeric_columns:
-
-            df[col] = df[col].fillna(
-                df[col].median()
-            )
-
-        text_columns = df.select_dtypes(
-            include="object"
-        ).columns
-
-        for col in text_columns:
-
-            df[col] = df[col].fillna(
-                "Unknown"
-            )
-
-        self.report.append(
-            "Missing values cleaned."
-        )
-
-        return df
-
-    # --------------------------------------------------
-    # Duplicate Check
-    # --------------------------------------------------
-
-    def check_duplicates(self, df):
-
-        duplicates = df.duplicated().sum()
-
-        self.report.append(
-            f"Duplicate Rows Found: {duplicates}"
-        )
-
-        return duplicates
-
-    # --------------------------------------------------
-    # Remove Duplicates
-    # --------------------------------------------------
-
-    def remove_duplicates(self, df):
-
-        before = len(df)
-
-        df = df.drop_duplicates()
-
-        after = len(df)
-
-        removed = before - after
-
-        self.report.append(
-            f"Duplicate Rows Removed: {removed}"
-        )
-
-        return df
-
-    # --------------------------------------------------
-    # Numeric Validation
-    # --------------------------------------------------
-
-    def validate_numeric_columns(
-        self,
-        df,
-        numeric_columns
-    ):
-
-        self.report.append(
-            "=== Numeric Validation ==="
-        )
-
-        for col in numeric_columns:
-
-            if col in df.columns:
-
-                invalid = pd.to_numeric(
-                    df[col],
-                    errors="coerce"
-                ).isna().sum()
-
-                self.report.append(
-                    f"{col}: {invalid} invalid values"
-                )
-
-                df[col] = pd.to_numeric(
-                    df[col],
-                    errors="coerce"
-                )
-
-        return df
-
-    # --------------------------------------------------
-    # Range Checks
-    # --------------------------------------------------
-
-    def range_checks(
-        self,
-        df,
-        numeric_columns
-    ):
-
-        self.report.append(
-            "=== Range Checks ==="
-        )
-
-        for col in numeric_columns:
-
-            if col in df.columns:
-
-                negatives = (
-                    df[col] < 0
-                ).sum()
-
-                self.report.append(
-                    f"{col}: {negatives} negative values"
-                )
-
-    # --------------------------------------------------
-    # Date Validation
-    # --------------------------------------------------
-
-    def validate_dates(
-        self,
-        df,
-        date_columns
-    ):
-
-        self.report.append(
-            "=== Date Validation ==="
-        )
-
-        for col in date_columns:
-
-            if col in df.columns:
-
-                converted = pd.to_datetime(
-                    df[col],
-                    errors="coerce"
-                )
-
-                invalid = (
-                    converted.isna().sum()
-                )
-
-                self.report.append(
-                    f"{col}: {invalid} invalid dates"
-                )
-
-                df[col] = converted
-
-        return df
-
-    # --------------------------------------------------
-    # Business Rules
-    # --------------------------------------------------
-
-    def business_rules(self, df):
-
-        self.report.append(
-            "=== Business Rules ==="
-        )
-
-        if (
-            "incident_date" in df.columns
-            and "disclosure_date" in df.columns
-        ):
-
-            invalid_dates = (
-                df["disclosure_date"]
-                < df["incident_date"]
-            ).sum()
-
-            self.report.append(
-                f"Disclosure before Incident: {invalid_dates}"
-            )
-
-        if "employee_count" in df.columns:
-
-            invalid_emp = (
-                df["employee_count"] <= 0
-            ).sum()
-
-            self.report.append(
-                f"Invalid Employee Counts: {invalid_emp}"
-            )
-
-    # --------------------------------------------------
-    # Data Quality Score
-    # --------------------------------------------------
-
-    def quality_score(self, df):
-
-        score = 100
-
-        missing = df.isnull().sum().sum()
-
-        duplicates = df.duplicated().sum()
-
-        score -= min(missing, 20)
-
-        score -= min(duplicates, 10)
-
-        score = max(score, 0)
-
-        self.report.append(
-            f"Data Quality Score: {score}/100"
-        )
-
-    # --------------------------------------------------
-    # Save Clean Dataset
-    # --------------------------------------------------
-
-    def save_clean_dataset(
-        self,
-        df,
-        output_path
-    ):
-
-        # Safely generate target folder structure if it doesn't exist
-        os.makedirs(os.path.dirname(output_path), exist_ok=True)
+    def profile_and_plan(self, file_path):
+        """
+        STAGE 1: COGNITIVE INSPECTION & STRATEGY PLANNING
+        The agent dynamically reviews data types, distributions, missing rates,
+        and asks the LLM to choose the mathematically optimal imputation strategy.
+        """
+        df = pd.read_csv(file_path)
+        print(f"\n🕵️‍♂️ Analyzing structural anomalies for: {os.path.basename(file_path)}...")
+
+        # Construct a structural profile of the data to feed the LLM's brain
+        data_profile = {}
+        for col in df.columns:
+            missing_count = int(df[col].isnull().sum())
+            missing_pct = (missing_count / len(df)) * 100
+            unique_count = int(df[col].nunique())
+            sample_vals = df[col].dropna().head(3).tolist()
+
+            if pd.api.types.is_numeric_dtype(df[col]):
+                col_type = "numeric"
+                # Calculate skewness to help the LLM decide between Mean or Median
+                skew = df[col].skew() if len(df[col].dropna()) > 2 else 0
+                stats = {"skew": round(skew, 2), "min": float(df[col].min()), "max": float(df[col].max())}
+            else:
+                col_type = "text/categorical"
+                stats = {}
+
+            data_profile[col] = {
+                "type": col_type,
+                "missing_pct": round(missing_pct, 1),
+                "unique_values_count": unique_count,
+                "sample_values": sample_vals,
+                "metrics": stats
+            }
+
+        prompt = f"""
+        You are a principal data scientist. Inspect this dataset schema and profiling data:
+        {json.dumps(data_profile, indent=2)}
+
+        Tasks:
+        1. Classify each column strictly into 'text_processing' or 'numeric_processing'.
+        2. For numeric columns with missing data (missing_pct > 0), choose the mathematically superior imputation strategy ('mean', 'median', or 'zero') based on the context, samples, and skewness metrics (highly skewed data should use median; normally distributed can use mean).
+        3. For text columns, determine if they look like categorical/name data that requires spelling standardisation ('spell_check': true/false).
+
+        Return strictly a valid JSON object matching this structure exactly. Do not include markdown wraps or code blocks.
+        {{
+          "columns": {{
+             "column_name_1": {{"action": "numeric_processing", "impute_strategy": "median"}},
+             "column_name_2": {{"action": "text_processing", "spell_check": true}}
+          }}
+        }}
+        """
         
-        df.to_csv(
-            output_path,
-            index=False
-        )
+        raw_plan = self._call_llm(prompt, "You output raw, valid JSON maps only.")
+        try:
+            return json.loads(raw_plan)["columns"]
+        except Exception:
+            print("⚠️ Profiling parser failed; applying standard fallback rules.")
+            return {col: {"action": "numeric_processing" if pd.api.types.is_numeric_dtype(df[col]) else "text_processing", "impute_strategy": "median", "spell_check": True} for col in df.columns}
 
-        self.report.append(
-            f"Clean dataset saved to: {output_path}"
-        )
+    def clean_numeric(self, df, col, strategy):
+        """STAGE 2A: DETERMINISTIC NUMERIC CLEANING & STRATEGIC IMPUTATION"""
+        # Force strip any accidental text/currency characters out of numeric vectors
+        if df[col].dtype == object:
+            df[col] = df[col].astype(str).str.replace(r'[^\d\.]', '', regex=True)
+            df[col] = pd.to_numeric(df[col], errors='coerce')
 
-    # --------------------------------------------------
-    # Generate Report
-    # --------------------------------------------------
+        if df[col].isnull().any():
+            if strategy == "mean":
+                fill_value = df[col].mean()
+            elif strategy == "median":
+                fill_value = df[col].median()
+            else:
+                fill_value = 0
+            
+            # Handle empty edge case
+            if pd.isna(fill_value): fill_value = 0
+            df[col] = df[col].fillna(fill_value)
+            print(f"   🔢 Filled missing rows in '{col}' using calculated {strategy} ({round(fill_value, 2)})")
+        return df
 
-    def generate_report(self):
+    def clean_text_with_reflection(self, df, col):
+        """STAGE 2B: AGENTIC TEXT STANDARDIZATION & Deduplication WITH CRITICAL SELF-REFLECTION"""
+        # Rapid programmatic syntax sanitization
+        df[col] = df[col].astype(str).str.strip().str.replace(r'\s+', ' ', regex=True)
+        unique_dirty = df[col].dropna().unique().tolist()
 
-        print("\n".join(self.report))
+        # Edge safeguard: ignore columns containing unique high-cardinality values like raw IDs
+        if not unique_dirty or len(unique_dirty) > 80:
+            return df
 
-    # --------------------------------------------------
-    # Main Run Function
-    # --------------------------------------------------
+        # Step 1: Mapping Generation
+        gen_prompt = f"""
+        Analyze these unique raw string terms from the database column '{col}':
+        {unique_dirty}
 
-    def run(
-        self,
-        input_file,
-        output_file,
-        numeric_columns=None,
-        date_columns=None
-    ):
+        Instructions:
+        - Correct typos and spelling errors.
+        - Convert all records to strict Title Case capitalization.
+        - Merge duplicate variations of identical business entities (e.g. 'Apple Inc.', 'apple inc', and 'Apple Corp' -> 'Apple Inc.').
 
-        df = self.load_data(input_file)
+        Return ONLY a Python dictionary mapping raw terms to cleaned terms. No prose.
+        Format: {{"old_string": "New Clean String"}}
+        """
+        try:
+            raw_map = self._call_llm(gen_prompt)
+            cleaning_map = ast.literal_eval(raw_map)
 
-        if df is None:
-            return
+            # Step 2: The Agentic Self-Reflection Audit Loop
+            reflect_prompt = f"""
+            Review this proposed translation dictionary built for data cleaning:
+            {cleaning_map}
 
-        # Default to empty lists if nothing is supplied
-        numeric_columns = numeric_columns if numeric_columns else []
-        date_columns = date_columns if date_columns else []
+            Act as an unyielding data auditor. Ensure the keys did not have their core semantic business identities swapped mistakenly (e.g., changing 'Gogle' to 'Google' is correct, but changing 'AIG Insurance' to 'Chubb Insurance' is a severe identity error).
+            
+            Identify any invalid or highly dangerous keys. Return ONLY a valid Python list of strings containing the keys that must be REJECTED.
+            Format: ["bad_key_1"]
+            If all changes look perfectly safe, return an empty list: []
+            """
+            raw_reflection = self._call_llm(reflect_prompt)
+            rejected_keys = ast.literal_eval(raw_reflection)
 
-        # 1. Identify raw issues and duplicates first
-        self.check_missing_values(df)
-        self.check_duplicates(df)
-        df = self.remove_duplicates(df)
+            if rejected_keys:
+                print(f"   🚫 Reflection Loop intercepted {len(rejected_keys)} unsafe alterations! Overruling: {rejected_keys}")
+                for key in rejected_keys:
+                    if key in cleaning_map: del cleaning_map[key]
 
-        # 2. Re-format and validate metrics (coerces string errors into NaNs)
-        df = self.validate_numeric_columns(df, numeric_columns)
-        self.range_checks(df, numeric_columns)
-        df = self.validate_dates(df, date_columns)
+            df[col] = df[col].map(cleaning_map).fillna(df[col])
+        except Exception as e:
+            print(f"   ⚠️ Skipping LLM syntax map for '{col}' due to formatting parsing error: {e}")
+        return df
 
-        # 3. Check custom contextual business logic
-        self.business_rules(df)
+    def execute_agent_pipeline(self, target_file_path):
+        """Main Orchestrator loop for a single file."""
+        cleaning_blueprint = self.profile_and_plan(target_file_path)
+        df = pd.read_csv(target_file_path)
 
-        # 4. Clean up all missing values (including structural ones generated above)
-        df = self.clean_missing_values(df)
+        for col, specifications in cleaning_blueprint.items():
+            if col not in df.columns: continue
+            
+            action = specifications.get("action")
+            if action == "numeric_processing":
+                strategy = specifications.get("impute_strategy", "median")
+                df = self.clean_numeric(df, col, strategy)
+            elif action == "text_processing":
+                if specifications.get("spell_check", True):
+                    print(f"   🔤 Deploying spellcheck and deduplication loop on '{col}'...")
+                    df = self.clean_text_with_reflection(df, col)
 
-        # 5. Conclude evaluation metrics and serialize out
-        self.quality_score(df)
-        self.save_clean_dataset(df, output_file)
-
-
-# --------------------------------------------------
-# Execution Target Block
-# --------------------------------------------------
+        # Export refined data asset
+        output_dir = os.path.dirname(target_file_path)
+        base_name = os.path.basename(target_file_path).replace(".csv", "_cleaned.csv")
+        final_output_path = os.path.join(output_dir, base_name)
+        
+        df.to_csv(final_output_path, index=False)
+        print(f"💾 Saved fully validated asset to: {final_output_path}")
 
 if __name__ == "__main__":
-
-    agent = DataValidationAgent()
-
-    # --- 1. Process financial_impact.csv ---
-    agent.run(
-        input_file="data/financial_impact.csv",
-        output_file="data/cleaned_financial_impact.csv",
-        numeric_columns=[
-            "direct_loss_usd", "ransom_demanded_usd", "ransom_paid_usd", 
-            "recovery_cost_usd", "legal_fees_usd", "regulatory_fine_usd", 
-            "insurance_payout_usd", "total_loss_usd", "total_loss_lower_bound", 
-            "total_loss_upper_bound", "inflation_adjusted_usd", "cpi_index_used"
-        ],
-        date_columns=["created_at", "updated_at"]
-    )
-
-    # --- 2. Process incidents_master.csv ---
-    agent.run(
-        input_file="data/incidents_master.csv",
-        output_file="data/cleaned_incidents_master.csv",
-        numeric_columns=[
-            "company_revenue_usd", "employee_count", "data_compromised_records", 
-            "downtime_hours", "quality_score"
-        ],
-        date_columns=[
-            "incident_date", "discovery_date", "disclosure_date", 
-            "created_at", "updated_at"
-        ]
-    )
-
-    # --- 3. Process market_impact.csv ---
-    agent.run(
-        input_file="data/market_impact.csv",
-        output_file="data/cleaned_market_impact.csv",
-        numeric_columns=[
-            "price_7d_before", "price_disclosure_day", "price_1d_after", 
-            "price_7d_after", "price_30d_after", "volume_avg_30d_baseline", 
-            "volume_disclosure_day", "sector_return_same_period", "abnormal_return_1d", 
-            "abnormal_return_7d", "abnormal_return_30d", "car_neg1_to_pos1", 
-            "car_0_to_7", "car_0_to_30", "car_0_to_90", "t_statistic_1d", 
-            "p_value_1d", "t_statistic_30d", "p_value_30d", "market_cap_at_disclosure", 
-            "volume_ratio_disclosure", "pre_incident_volatility_30d", 
-            "post_incident_volatility_30d", "days_to_price_recovery"
-        ],
-        date_columns=["created_at", "updated_at"]
-    )
-
-    # Print the aggregated report across all processing cycles
-    agent.generate_report()
+    # 1. Initialize your agent
+    agent = FullyAgenticValidator()
+    
+    # 2. Automatically find ALL CSV files inside your data folder
+    data_folder = "data"
+    csv_files = glob.glob(os.path.join(data_folder, "*.csv"))
+    
+    # Filter out files that have already been cleaned so we don't loop infinitely
+    files_to_clean = [f for f in csv_files if "_cleaned" not in f]
+    
+    if not files_to_clean:
+        print(f"🤷‍♂️ No raw CSV files found to process in '{data_folder}'!")
+    else:
+        print(f"🤖 Found {len(files_to_clean)} files. Starting batch agentic validation...")
+        
+        # 3. Loop through every single file and execute the pipeline
+        for file_path in files_to_clean:
+            print(f"\n==========================================")
+            print(f"🔄 Processing Next File: {file_path}")
+            print(f"==========================================")
+            agent.execute_agent_pipeline(file_path)
+            
+        print("\n🎉 All datasets have been successfully processed by the agent!")
