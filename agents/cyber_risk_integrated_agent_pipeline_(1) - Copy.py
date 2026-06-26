@@ -24,10 +24,10 @@ import subprocess
 
 warnings.filterwarnings("ignore")
 
-if "GOOGLE_API_KEY" in st.secrets:
-    os.environ["GOOGLE_API_KEY"] = st.secrets["GOOGLE_API_KEY"]
-else:
-    st.error("ERROR: GOOGLE_API_KEY not found in Streamlit Secrets. Please set it in .streamlit/secrets.toml")
+# if "GOOGLE_API_KEY" in st.secrets:
+#     os.environ["GOOGLE_API_KEY"] = st.secrets["GOOGLE_API_KEY"]
+# else:
+#     st.error("ERROR: GOOGLE_API_KEY not found in Streamlit Secrets. Please set it in .streamlit/secrets.toml")
 
 print("=" * 80)
 print("INTEGRATED CYBER RISK QUOTATION AGENT - COMPLETE PIPELINE")
@@ -744,10 +744,10 @@ import streamlit as st
 import os
 
 # 1. Securely initialize the Gemini API Key using Streamlit Secrets
-# if "GOOGLE_API_KEY" in st.secrets:
-#     os.environ["GOOGLE_API_KEY"] = st.secrets["GOOGLE_API_KEY"]
-# else:
-#     st.error("ERROR: GOOGLE_API_KEY not found in Streamlit Secrets. Please set it in .streamlit/secrets.toml")
+if "GOOGLE_API_KEY" in st.secrets:
+    os.environ["GOOGLE_API_KEY"] = st.secrets["GOOGLE_API_KEY"]
+else:
+    st.error("ERROR: GOOGLE_API_KEY not found in Streamlit Secrets. Please set it in .streamlit/secrets.toml")
 
 # 2. Streamlit UI Layout Design
 st.set_page_config(page_title="AI Cyber Insurance Pricing Engine", layout="wide")
