@@ -817,26 +817,3 @@ if submitted:
         except Exception as e:
             st.error(f"An execution error occurred during calculation routing: {e}")
             st.info("Check your underlying GLM coefficients or dataset path structures.")
-
-"""## GENERATING API KEY"""
-
-# from google.colab import userdata
-# os.environ["GOOGLE_API_KEY"] = userdata.get('Capstone_Project')
-
-"""## AGENT DEMO QUERIES"""
-
-# query = "Generate a quote for TechCorp Inc., $150 billion revenue, 250,000 employees,Technology industry (code 51), public company, 100 million customer records"
-# response = quotation_agent.run(query)
-# print(response.content)
-
-# query = "What is the difference between Tier 1 and Tier 2 coverage?"
-# response = quotation_agent.run(query)
-# print(response.content)
-
-# query = "If Tier 1 costs $50 million, what would Tier 2 and combined cost?"
-# response = quotation_agent.run(query)
-# print(response.content)
-
-# query = "What is cyber insurance?"
-# response = quotation_agent.run(query)
-# print(response.content)
