@@ -2,7 +2,7 @@ import os
 import ast
 import glob
 import json
-import time  # 🕒 Handles our rate-limiting pacing delays
+import time  # 🕒 Handles our defensive rate-limiting pacing delays
 import numpy as np
 import pandas as pd
 from google import genai
@@ -83,9 +83,9 @@ class FullyAgenticValidator:
             
         try:
             plan = json.loads(raw_plan)["columns"]
-            # ⏳ PLACE 1: Pause after generating the blueprint to avoid hitting limits immediately
-            print("   ⏳ Blueprint generated. Pausing 4 seconds for API recovery...")
-            time.sleep(4)
+            # ⏳ PLACE 1: Blueprint recovery pause
+            print("   ⏳ Blueprint generated. Pausing 5 seconds for API recovery...")
+            time.sleep(5)
             return plan
         except Exception:
             print("⚠️ Profiling parser failed; applying standard fallback rules.")
@@ -133,10 +133,15 @@ class FullyAgenticValidator:
         """
         try:
             raw_map = self._call_llm(gen_prompt, "You output raw, valid JSON structures only. No formatting wraps.")
-            if raw_map and raw_map.startswith("```"):
+            
+            # 🛡️ Defensive Check: If LLM rejected or resource was exhausted, exit gracefully
+            if not raw_map:
+                print(f"   ⚠️ API token pool empty or server busy. Skipping text mapping for '{col}'.")
+                return df
+
+            if raw_map.startswith("```"):
                 raw_map = raw_map.strip("```json").strip("```python").strip("```").strip()
             
-            # Using robust json JSON parsing instead of ast.literal_eval
             cleaning_map = json.loads(raw_map)
 
             reflect_prompt = f"""
@@ -149,15 +154,16 @@ class FullyAgenticValidator:
             If all changes look perfectly safe, return an empty list: []
             """
             raw_reflection = self._call_llm(reflect_prompt, "You output raw, valid JSON lists only.")
-            if raw_reflection and raw_reflection.startswith("```"):
-                raw_reflection = raw_reflection.strip("```json").strip("```python").strip("```").strip()
             
-            rejected_keys = json.loads(raw_reflection)
+            if raw_reflection:
+                if raw_reflection.startswith("```"):
+                    raw_reflection = raw_reflection.strip("```json").strip("```python").strip("```").strip()
+                rejected_keys = json.loads(raw_reflection)
 
-            if rejected_keys:
-                print(f"   🚫 Reflection Loop intercepted {len(rejected_keys)} unsafe alterations! Overruling: {rejected_keys}")
-                for key in rejected_keys:
-                    if key in cleaning_map: del cleaning_map[key]
+                if rejected_keys:
+                    print(f"   🚫 Reflection Loop intercepted {len(rejected_keys)} unsafe alterations! Overruling: {rejected_keys}")
+                    for key in rejected_keys:
+                        if key in cleaning_map: del cleaning_map[key]
 
             df[col] = df[col].map(cleaning_map).fillna(df[col])
         except Exception as e:
@@ -180,9 +186,9 @@ class FullyAgenticValidator:
                     print(f"   🔤 Deploying spellcheck and deduplication loop on '{col}'...")
                     df = self.clean_text_with_reflection(df, col)
                     
-                    # 🕒 PLACE 2: Pause after processing a text column to avoid hitting the 15 RPM barrier
-                    print("   ⏳ Column cleaned. Pausing 4 seconds for API recovery...")
-                    time.sleep(4) 
+                    # 🕒 PLACE 2: Expanded text loop delay to 8 seconds to completely refresh free tier quotas
+                    print("   ⏳ Column cleaned. Pausing 8 seconds for token pool recovery...")
+                    time.sleep(8) 
 
         output_dir = os.path.dirname(target_file_path)
         base_name = os.path.basename(target_file_path).replace(".csv", "_cleaned.csv")
