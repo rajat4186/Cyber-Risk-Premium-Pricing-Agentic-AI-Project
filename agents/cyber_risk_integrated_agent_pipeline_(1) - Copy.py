@@ -65,8 +65,8 @@ try:
     # market = pd.read_csv( "/content/data/market_impact_cleaned.csv")
 
     incidents = pd.read_csv( "incidents_master_cleaned.csv")
-    # financial = pd.read_csv( "financial_impact_cleaned.csv")
-    # market = pd.read_csv( "market_impact_cleaned.csv")
+    financial = pd.read_csv( "financial_impact_cleaned.csv")
+    market = pd.read_csv( "market_impact_cleaned.csv")
 
     
     print(f"✓ Loaded incidents: {len(incidents)} records")
