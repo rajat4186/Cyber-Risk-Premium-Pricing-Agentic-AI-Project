@@ -2,7 +2,7 @@ import os
 import ast
 import glob
 import json
-import time  # 🕒 Critical: handles our pacing delays
+import time  # 🕒 Handles our rate-limiting pacing delays
 import numpy as np
 import pandas as pd
 from google import genai
@@ -111,7 +111,7 @@ class FullyAgenticValidator:
         return df
 
     def clean_text_with_reflection(self, df, col):
-        """STAGE 2B: AGENTIC TEXT STANDARDIZATION WITH SELF-REFLECTION"""
+        """STAGE 2B: AGENTIC TEXT STANDARDIZATION WITH RESILIENT JSON PARSING"""
         df[col] = df[col].astype(str).str.strip().str.replace(r'\s+', ' ', regex=True)
         unique_dirty = df[col].dropna().unique().tolist()
 
@@ -127,28 +127,32 @@ class FullyAgenticValidator:
         - Convert all records to strict Title Case capitalization.
         - Merge duplicate variations of identical business entities.
 
-        Return ONLY a Python dictionary mapping raw terms to cleaned terms. No markdown formatting or prose.
+        Return strictly a valid JSON object mapping old dirty terms to new clean terms. 
+        Do not include markdown wraps or code block syntax.
         Format: {{"old_string": "New Clean String"}}
         """
         try:
-            raw_map = self._call_llm(gen_prompt)
+            raw_map = self._call_llm(gen_prompt, "You output raw, valid JSON structures only. No formatting wraps.")
             if raw_map and raw_map.startswith("```"):
-                raw_map = raw_map.strip("```python").strip("```json").strip("```").strip()
-            cleaning_map = ast.literal_eval(raw_map)
+                raw_map = raw_map.strip("```json").strip("```python").strip("```").strip()
+            
+            # Using robust json JSON parsing instead of ast.literal_eval
+            cleaning_map = json.loads(raw_map)
 
             reflect_prompt = f"""
             Review this proposed translation dictionary built for data cleaning:
-            {cleaning_map}
+            {json.dumps(cleaning_map)}
 
             Act as an unyielding data auditor. Ensure the keys did not have their core semantic business identities swapped mistakenly.
-            Identify any invalid or highly dangerous keys. Return ONLY a valid Python list of strings containing the keys that must be REJECTED.
+            Identify any invalid or highly dangerous keys. Return strictly a valid JSON list of strings containing the keys that must be REJECTED.
             Format: ["bad_key_1"]
             If all changes look perfectly safe, return an empty list: []
             """
-            raw_reflection = self._call_llm(reflect_prompt)
+            raw_reflection = self._call_llm(reflect_prompt, "You output raw, valid JSON lists only.")
             if raw_reflection and raw_reflection.startswith("```"):
-                raw_reflection = raw_reflection.strip("```python").strip("```json").strip("```").strip()
-            rejected_keys = ast.literal_eval(raw_reflection)
+                raw_reflection = raw_reflection.strip("```json").strip("```python").strip("```").strip()
+            
+            rejected_keys = json.loads(raw_reflection)
 
             if rejected_keys:
                 print(f"   🚫 Reflection Loop intercepted {len(rejected_keys)} unsafe alterations! Overruling: {rejected_keys}")
