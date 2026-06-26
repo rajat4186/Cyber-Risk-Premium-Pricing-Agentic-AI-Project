@@ -2,7 +2,7 @@ import os
 import ast
 import glob
 import json
-import time  # Handles rate limits for the free tier
+import time  # 🕒 Critical: handles our pacing delays
 import numpy as np
 import pandas as pd
 from google import genai
@@ -82,7 +82,11 @@ class FullyAgenticValidator:
             raw_plan = raw_plan.strip("```json").strip("```").strip()
             
         try:
-            return json.loads(raw_plan)["columns"]
+            plan = json.loads(raw_plan)["columns"]
+            # ⏳ PLACE 1: Pause after generating the blueprint to avoid hitting limits immediately
+            print("   ⏳ Blueprint generated. Pausing 4 seconds for API recovery...")
+            time.sleep(4)
+            return plan
         except Exception:
             print("⚠️ Profiling parser failed; applying standard fallback rules.")
             return {col: {"action": "numeric_processing" if pd.api.types.is_numeric_dtype(df[col]) else "text_processing", "impute_strategy": "median", "spell_check": True} for col in df.columns}
@@ -171,7 +175,9 @@ class FullyAgenticValidator:
                 if specifications.get("spell_check", True):
                     print(f"   🔤 Deploying spellcheck and deduplication loop on '{col}'...")
                     df = self.clean_text_with_reflection(df, col)
-                    # 🕒 Rate Limit Safety: Sleep 4 seconds between text columns to stay under 15 RPM
+                    
+                    # 🕒 PLACE 2: Pause after processing a text column to avoid hitting the 15 RPM barrier
+                    print("   ⏳ Column cleaned. Pausing 4 seconds for API recovery...")
                     time.sleep(4) 
 
         output_dir = os.path.dirname(target_file_path)
