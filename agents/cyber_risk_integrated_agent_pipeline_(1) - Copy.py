@@ -33,7 +33,7 @@ Install required libraries for data manipulation, statistical modeling, and the 
 """
 
 print("\n[PHASE 0] Installing dependencies...")
-!pip install -q agno google-genai scipy scikit-learn pandas numpy matplotlib
+# !pip install -q agno google-genai scipy scikit-learn pandas numpy matplotlib
 
 from agno.agent import Agent
 from agno.models.google import Gemini
