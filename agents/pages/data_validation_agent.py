@@ -214,6 +214,32 @@ if __name__ == "__main__":
             agent.execute_agent_pipeline(file_path)
         print("\n🎉 All datasets have been successfully processed by the agent!")
 
-        ## ADD API KEYS
+## ADD API KEYS
 
-        os.environ["GEMINI_API_KEY"] = userdata.get('Capstone_Project')
+os.environ["GEMINI_API_KEY"] = userdata.get('Capstone_Project')
+
+## UI FOR STREAMLIT APPLICATION
+
+st.subheader("📁 Upload Actuarial Dataset")
+uploaded_file = st.file_uploader("Choose a CSV or text file to analyze:", type= "csv")
+
+if uploaded_file is not None:
+    # Read a preview dataframe using pandas
+    df_preview = pd.read_csv(uploaded_file)
+    st.write("📊 **Raw File Preview (First 5 rows):**")
+    st.dataframe(df_preview.head())
+    
+    if st.button("Execute Agent Validation Audit"):
+        with st.spinner("Agent parsing schema strings and conducting self-correcting sanity checks..."):
+            try:
+                # Convert first few rows to a text structure for the agent to inspect
+                sample_data = df_preview.head(10).to_string()
+                
+                query = f"Audit and validate the data mapping structure of this sample matrix:\n{sample_data}"
+                response = data_cleaning_agent.run(query)
+                
+                st.success("✓ Data Schema Audit Completed!")
+                st.markdown(response.content)
+                
+            except Exception as e:
+                st.error(f"Validation workflow pipeline hit an execution error: {e}")
