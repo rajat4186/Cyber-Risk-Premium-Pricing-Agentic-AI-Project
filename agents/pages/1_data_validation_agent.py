@@ -5,11 +5,57 @@ import json
 import time  # 🕒 Handles our defensive rate-limiting pacing delays
 import numpy as np
 import pandas as pd
+import streamlit as st
 from google import genai
 from google.genai import types
+from agno.agent import Agent
+from agno.models.google import Gemini
+
+# ----------------------------------------------------
+# API Key Setup
+# ----------------------------------------------------
+# 1. Check Streamlit Secrets
+if "GOOGLE_API_KEY" not in os.environ:
+    if "GEMINI_API_KEY" in st.secrets:
+        os.environ["GOOGLE_API_KEY"] = st.secrets["GEMINI_API_KEY"]
+    elif "GOOGLE_API_KEY" in st.secrets:
+        os.environ["GOOGLE_API_KEY"] = st.secrets["GOOGLE_API_KEY"]
+    elif "Capstone_Project" in st.secrets:
+        os.environ["GOOGLE_API_KEY"] = st.secrets["Capstone_Project"]
+
+if "GEMINI_API_KEY" not in os.environ:
+    if "GEMINI_API_KEY" in st.secrets:
+        os.environ["GEMINI_API_KEY"] = st.secrets["GEMINI_API_KEY"]
+    elif "GOOGLE_API_KEY" in st.secrets:
+        os.environ["GEMINI_API_KEY"] = st.secrets["GOOGLE_API_KEY"]
+    elif "Capstone_Project" in st.secrets:
+        os.environ["GEMINI_API_KEY"] = st.secrets["Capstone_Project"]
+
+# 2. Check Colab Secrets (for backward compatibility if run in Colab)
+try:
+    from google.colab import userdata
+    colab_key = userdata.get('Capstone_Project') or userdata.get('GEMINI_API_KEY') or userdata.get('GOOGLE_API_KEY')
+    if colab_key:
+        if "GOOGLE_API_KEY" not in os.environ:
+            os.environ["GOOGLE_API_KEY"] = colab_key
+        if "GEMINI_API_KEY" not in os.environ:
+            os.environ["GEMINI_API_KEY"] = colab_key
+except (ImportError, Exception):
+    pass
 
 # Initialize the Gemini Client
 client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
+
+# Initialize the Agno Agent for UI Validation Audit
+data_cleaning_agent = Agent(
+    name="Data Schema Auditor",
+    model=Gemini(id="gemini-2.5-flash"),
+    instructions=[
+        "You are an expert data science agent.",
+        "Audit and validate the data mapping structure of the provided sample matrix.",
+        "Provide a clear breakdown of recommendations, structural issues, and potential data quality anomalies."
+    ]
+)
 
 class FullyAgenticValidator:
     def __init__(self, model="gemini-2.5-flash"):
@@ -216,7 +262,7 @@ if __name__ == "__main__":
 
 ## ADD API KEYS
 
-os.environ["GEMINI_API_KEY"] = userdata.get('Capstone_Project')
+# API keys are configured at the top of the file using Streamlit secrets and Colab compatibility
 
 ## UI FOR STREAMLIT APPLICATION
 
