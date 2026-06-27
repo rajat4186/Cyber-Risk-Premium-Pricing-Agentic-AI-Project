@@ -398,8 +398,8 @@ from agno.agent import Agent
 try:
     from cyber_ai_reinsurance_quotation_agent import reinsurance_agent # Example agent instance name
 except ImportError:
-    # Fallback/Placeholder if importing directly needs to be initialized here
-    reinsurance_agent = None
+    # Fallback to the locally defined quotation_agent
+    reinsurance_agent = quotation_agent
 
 # 1. Page Configuration & Styling
 st.set_page_config(
