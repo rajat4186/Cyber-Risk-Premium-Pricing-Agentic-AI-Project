@@ -17,7 +17,7 @@ Original file is located at
 ## 1. Install Dependencies
 """
 
-!pip install -q agno google-genai
+# !pip install -q agno google-genai
 print('✓ Dependencies installed')
 
 """## 2. Standard Imports & Configuration"""

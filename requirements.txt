@@ -1,0 +1,8 @@
+agno
+google-genai
+scipy
+scikit-learn
+pandas
+numpy
+matplotlib
+streamlit
