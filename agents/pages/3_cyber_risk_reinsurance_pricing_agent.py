@@ -43,12 +43,12 @@ print('✓ Imports successful')
 
 try:
     from google.colab import userdata
-    os.environ["GOOGLE_API_KEY"] = userdata.get("Actuarial project")
+    os.environ["GOOGLE_API_KEY"] = userdata.get("Actuarial_project")
 except (ImportError, Exception):
     if "GOOGLE_API_KEY" not in os.environ:
         raise RuntimeError(
             "GOOGLE_API_KEY is not set. "
-            "Add it via Colab Secrets (left sidebar key icon, name: Actuarial project) "
+            "Add it via Colab Secrets (left sidebar key icon, name: Actuarial_project) "
             "or export it as an environment variable."
         )
 
