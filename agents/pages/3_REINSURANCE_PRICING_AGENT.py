@@ -23,17 +23,17 @@ pd.set_option('display.max_columns', 50)
 pd.set_option('display.width', 120)
 
 # API Key Management
-if "GOOGLE_API_KEY" not in os.environ:
-    if "GEMINI_API_KEY" in st.secrets:
-        os.environ["GOOGLE_API_KEY"] = st.secrets["GEMINI_API_KEY"]
-    elif "GOOGLE_API_KEY" in st.secrets:
-        os.environ["GOOGLE_API_KEY"] = st.secrets["GOOGLE_API_KEY"]
-    elif "Final_Project_Key" in st.secrets:
-        os.environ["GOOGLE_API_KEY"] = st.secrets["Final_Project_Key"]
-    else:
-        st.error("ERROR: GOOGLE_API_KEY not found in Streamlit Secrets. Please set it in .streamlit/secrets.toml")
-else:
-    st.error("ERROR: GOOGLE_API_KEY not found in Streamlit Secrets. Please set it in .streamlit/secrets.toml")
+# if "GOOGLE_API_KEY" not in os.environ:
+#     if "GEMINI_API_KEY" in st.secrets:
+#         os.environ["GOOGLE_API_KEY"] = st.secrets["GEMINI_API_KEY"]
+#     elif "GOOGLE_API_KEY" in st.secrets:
+#         os.environ["GOOGLE_API_KEY"] = st.secrets["GOOGLE_API_KEY"]
+#     elif "Final_Project_Key" in st.secrets:
+#         os.environ["GOOGLE_API_KEY"] = st.secrets["Final_Project_Key"]
+#     else:
+#         st.error("ERROR: GOOGLE_API_KEY not found in Streamlit Secrets. Please set it in .streamlit/secrets.toml")
+# else:
+#     st.error("ERROR: GOOGLE_API_KEY not found in Streamlit Secrets. Please set it in .streamlit/secrets.toml")
 
 # ============================================================================
 # DYNAMIC PREMIUM STATISTICS CALCULATION
