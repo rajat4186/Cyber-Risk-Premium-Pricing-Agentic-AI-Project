@@ -7,6 +7,8 @@ import pandas as pd
 import streamlit as st
 from datetime import datetime
 from typing import Dict, Tuple, Any
+from sklearn.linear_model import Ridge, PoissonRegressor
+from sklearn.model_selection import train_test_split
 
 # Agno Framework and Model Imports
 from agno.agent import Agent
@@ -22,21 +24,85 @@ from reportlab.lib.units import inch
 warnings.filterwarnings("ignore")
 
 # -----------------------------------------------------------------------------
-# PHASE 1: ACTUARIAL COEFFICIENTS & FALLBACK STORAGE
+# PHASE 1: DYNAMIC MODEL TRAINING — Poisson GLM + Lognormal Severity
 # -----------------------------------------------------------------------------
-# These match the exact outputs extracted from your trained Poisson and Lognormal models
-FREQ_COEFFICIENTS = {
-    "intercept": -1.4502,
-    "log_revenue": 0.0841,
-    "log_employees": 0.0512,
-    "is_public": 0.1292,
-    "revenue_tier": 0.2145
+_FREQ_FALLBACK = {
+    "intercept": -1.4502, "log_revenue": 0.0841, "log_employees": 0.0512,
+    "is_public": 0.1292, "revenue_tier": 0.2145
 }
+_LOGNORM_FALLBACK = {"mu": 14.8504, "sigma": 1.2842}
 
-LOGNORM_PARAMS = {
-    "mu": 14.8504,
-    "sigma": 1.2842
-}
+@st.cache_data(show_spinner="Training frequency & severity models from live data...")
+def train_models():
+    """Load data from GitHub and train Poisson GLM + Lognormal models dynamically."""
+    try:
+        incidents = pd.read_csv(
+            "https://raw.githubusercontent.com/rajat4186/Cyber-Risk-Premium-Pricing-Agentic-AI-Project/refs/heads/main/data/incidents_master_cleaned.csv"
+        )
+        financial = pd.read_csv(
+            "https://raw.githubusercontent.com/rajat4186/Cyber-Risk-Premium-Pricing-Agentic-AI-Project/refs/heads/main/data/financial_impact_cleaned.csv"
+        )
+
+        # --- Frequency Model (Poisson GLM) ---
+        company_freq = (
+            incidents.groupby("company_name")
+            .agg({"incident_id": "count", "company_revenue_usd": "first",
+                  "employee_count": "first", "is_public_company": "first"})
+            .reset_index()
+            .rename(columns={"incident_id": "incident_count"})
+            .dropna()
+        )
+        Xf = company_freq[["company_revenue_usd", "employee_count", "is_public_company"]].copy()
+        Xf["log_revenue"]   = np.log1p(Xf["company_revenue_usd"])
+        Xf["log_employees"] = np.log1p(Xf["employee_count"])
+        Xf["revenue_tier"]  = pd.cut(Xf["company_revenue_usd"],
+                                     bins=[0, 1e9, 10e9, 100e9, np.inf],
+                                     labels=[0, 1, 2, 3]).astype(int)
+        yf = company_freq["incident_count"]
+        Xf_model = Xf[["log_revenue", "log_employees", "is_public_company", "revenue_tier"]].fillna(0)
+        Xf_tr, _, yf_tr, _ = train_test_split(Xf_model, yf, test_size=0.2, random_state=42)
+
+        freq_model = PoissonRegressor(alpha=0.1292, max_iter=1000)
+        freq_model.fit(Xf_tr, yf_tr)
+        freq_coefs = {
+            "intercept":    float(freq_model.intercept_),
+            "log_revenue":  float(freq_model.coef_[0]),
+            "log_employees":float(freq_model.coef_[1]),
+            "is_public":    float(freq_model.coef_[2]),
+            "revenue_tier": float(freq_model.coef_[3]),
+        }
+
+        # --- Severity Model (Lognormal + Ridge) ---
+        losses    = financial["total_loss_usd"].values
+        log_losses = np.log(losses)
+        lognorm   = {"mu": float(log_losses.mean()), "sigma": float(log_losses.std())}
+
+        merged = incidents.merge(financial, on="incident_id", how="inner")
+        Xs = merged[["company_revenue_usd", "employee_count", "is_public_company"]].copy()
+        Xs["log_revenue"]   = np.log1p(Xs["company_revenue_usd"])
+        Xs["log_employees"] = np.log1p(Xs["employee_count"])
+        Xs["log_records"]   = np.log1p(1_000_000)
+        ys = np.log(merged["total_loss_usd"])
+        Xs_model = Xs[["log_revenue", "log_employees", "is_public_company", "log_records"]].fillna(0)
+        Xs_tr, _, ys_tr, _ = train_test_split(Xs_model, ys, test_size=0.2, random_state=42)
+
+        sev_model = Ridge(alpha=1.0)
+        sev_model.fit(Xs_tr, ys_tr)
+        sev_coefs = {
+            "intercept":    float(sev_model.intercept_),
+            "log_revenue":  float(sev_model.coef_[0]),
+            "log_employees":float(sev_model.coef_[1]),
+            "is_public":    float(sev_model.coef_[2]),
+            "log_records":  float(sev_model.coef_[3]),
+        }
+
+        return freq_coefs, lognorm, sev_coefs
+
+    except Exception as e:
+        st.warning(f"Live model training failed ({e}). Using pre-trained fallback coefficients.")
+        return _FREQ_FALLBACK, _LOGNORM_FALLBACK, None
+
+FREQ_COEFFICIENTS, LOGNORM_PARAMS, SEVER_COEFFICIENTS = train_models()
 
 LOADING_FACTORS = {
     "acquisition": 0.20,
@@ -187,7 +253,66 @@ def calculate_insurance_quotation(revenue: float, employees: int, is_public: boo
     }
 
 # -----------------------------------------------------------------------------
-# PHASE 3: PRODUCTION REPORTLAB HIGH-FIDELITY PDF TOOL
+# PHASE 3: DYNAMIC NARRATIVE BUILDER
+# -----------------------------------------------------------------------------
+def _build_narrative(data: dict) -> str:
+    company  = data.get("company_profile", {})
+    risk     = data.get("risk_metrics", {})
+    premium  = data.get("premium_calculations", {})
+    reins    = data.get("reinsurance_allocation", {})
+
+    name        = company.get("name", "The client")
+    industry    = company.get("industry", "the sector")
+    revenue     = company.get("revenue", 0)
+    employees   = company.get("employees", 0)
+    freq        = risk.get("predicted_frequency", 0)
+    severity    = risk.get("expected_severity", 0)
+    q95         = risk.get("q95_loss", 0)
+    risk_score  = risk.get("risk_score", 0)
+    pure_prem   = premium.get("pure_premium", 0)
+    final_prem  = premium.get("final_premium", 0)
+    hybrid      = reins.get("hybrid_total_cost", 0)
+    quota_net   = reins.get("proportional", {}).get("quota_share", {}).get("net", 0)
+    surplus_net = reins.get("proportional", {}).get("surplus_share", {}).get("net", 0)
+    xol_prem    = reins.get("excess_of_loss", {}).get("layer1", {}).get("premium", 0)
+
+    if risk_score >= 80:
+        risk_level      = "HIGH"
+        coverage_rec    = "complete Tier 1 + Tier 2 combined coverage"
+        urgency         = "Immediate underwriting action is recommended."
+    elif risk_score >= 50:
+        risk_level      = "MODERATE"
+        coverage_rec    = "Tier 1 primary coverage with XOL tail extension"
+        urgency         = "Standard underwriting review is advised."
+    else:
+        risk_level      = "LOW-TO-MODERATE"
+        coverage_rec    = "Tier 1 primary coverage"
+        urgency         = "Routine monitoring is sufficient."
+
+    return (
+        f"{name} operates in the {industry} sector with annual revenues of ${revenue:,.0f} "
+        f"and a workforce of {employees:,} employees. "
+        f"Actuarial modelling using a Poisson GLM frequency model and Lognormal severity distribution "
+        f"projects an incident frequency of {freq:.4f} cyber events per annum with an expected per-event "
+        f"loss severity of ${severity:,.0f}. The 95th-percentile tail loss exposure stands at ${q95:,.0f}, "
+        f"reflecting the organisation's significant digital footprint and data processing obligations.\n\n"
+
+        f"The Aggregate Risk Score of {risk_score}/100 classifies this entity as a {risk_level} cyber risk. "
+        f"The actuarial pure premium — representing expected annual losses before any expense loading — "
+        f"is ${pure_prem:,.0f}. After applying the standard 58% composite loading (acquisition 20%, "
+        f"administration 10%, profit margin 15%, uncertainty buffer 8%, reinsurance ceded 5%), "
+        f"the recommended gross annual premium is ${final_prem:,.0f}.\n\n"
+
+        f"A hybrid reinsurance placement is recommended comprising: a Quota Share layer (net cost "
+        f"${quota_net:,.0f}), a Surplus Share layer (net cost ${surplus_net:,.0f}), and an Excess of "
+        f"Loss Layer 1 tail aggregate (${xol_prem:,.0f}), yielding a total reinsurance portfolio cost "
+        f"of ${hybrid:,.0f}. This structure optimises capital efficiency by combining proportional "
+        f"frequency protection with catastrophic tail coverage. "
+        f"The underwriting recommendation is {coverage_rec}. {urgency}"
+    )
+
+# -----------------------------------------------------------------------------
+# PHASE 4: PRODUCTION REPORTLAB HIGH-FIDELITY PDF TOOL
 # -----------------------------------------------------------------------------
 def generate_pdf_report(quotation_data_json: str, output_filename: str = "Cyber_Risk_Insurance_Report.pdf") -> str:
     """
@@ -312,7 +437,10 @@ def generate_pdf_report(quotation_data_json: str, output_filename: str = "Cyber_
     
     # Section 4: Narrative
     story.append(Paragraph("4. Strategic Underwriting Narrative", h1_style))
-    story.append(Paragraph(data.get("agent_explanations", "Risk thresholds match enterprise safety margins. The layered mitigation protects corporate capacity."), body_style))
+    narrative_text = _build_narrative(data)
+    for para in narrative_text.split("\n\n"):
+        story.append(Paragraph(para.strip(), body_style))
+        story.append(Spacer(1, 6))
     
     doc.build(story)
     return output_filename
