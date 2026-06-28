@@ -98,7 +98,7 @@ else:
                 and regex cleaning rules to generate contextually sanitized datasets.
                 """
             )
-            st.caption("Primary Artifacts: `incidents_cleaned.csv` | `financial_impact_cleaned.csv`")
+            # st.caption("Primary Artifacts: `incidents_cleaned.csv` | `financial_impact_cleaned.csv`")
 
         st.markdown(" ") # Spacer
 
@@ -111,18 +111,18 @@ else:
                 Quota Share percentages, Excess of Loss (XOL) attachment triggers, and systemic accumulation layers.
                 """
             )
-            st.caption("Primary Artifacts: `reinsurance_treaty_structures.json`")
+            # st.caption("Primary Artifacts: `reinsurance_treaty_structures.json`")
 
     with col2:
         with st.container(border=True):
             st.markdown("#### 📊 2. Insurance Pricing Agent")
             st.markdown(
                 """
-                Houses the core predictive mathematical modeling stack. Marries the **Poisson GLM Frequency Model** with empirical severity loss estimations to calculate Pure Risk Premiums ($\mu = \lambda \times \text{Severity}$). 
+                Houses the core predictive mathematical modeling stack. Marries the **Poisson GLM Frequency Model** with empirical severity loss estimations to calculate Risk Premiums. 
                 Applies risk loading factors across Primary (Tier 1) and Secondary (Tier 2) attack profiles.
                 """
             )
-            st.caption("Primary Artifacts: `poisson_frequency_model.py` | `premium_calculation_engine.py`")
+            # st.caption("Primary Artifacts: `poisson_frequency_model.py` | `premium_calculation_engine.py`")
 
         st.markdown(" ") # Spacer
 
@@ -135,7 +135,7 @@ else:
                 and outputs production-ready compliance reports for auditing and regulatory oversight.
                 """
             )
-            st.caption("Primary Artifacts: `Executive_Risk_Briefing.pdf`")
+            # st.caption("Primary Artifacts: `Executive_Risk_Briefing.pdf`")
 
     # Footer Information
     st.markdown("---")
