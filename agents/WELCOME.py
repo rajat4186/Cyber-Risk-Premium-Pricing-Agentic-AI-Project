@@ -22,7 +22,7 @@ homepage = st.Page(
 )
 
 data_validation_agent = st.Page(
-    page="pages/1_DATA_VALIDATION_AGENT.py", 
+    page="pages/data_validation_agent_optimized.py", 
     title="Data Validation Agent", 
     icon="✅"
 )
