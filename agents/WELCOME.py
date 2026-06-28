@@ -15,7 +15,7 @@ st.set_page_config(
 # ==============================================================================
 # Defining pages explicitly ensures strict order, custom icons, and proper rendering
 homepage = st.Page(
-    page="streamlit_app.py", 
+    page="WELCOME.py", 
     title="Dashboard Home", 
     icon="🏠", 
     default=True
