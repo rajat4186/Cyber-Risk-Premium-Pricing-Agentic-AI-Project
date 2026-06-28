@@ -16,6 +16,7 @@ import pandas as pd
 from typing import Any, Dict
 from dataclasses import dataclass
 from datetime import datetime
+import streamlit as st
 
 np.random.seed(42)
 pd.set_option('display.max_columns', 50)
@@ -336,9 +337,6 @@ except Exception as e:
 # ============================================================================
 # STREAMLIT DEPLOYMENT
 # ============================================================================
-
-import streamlit as st
-import os
 
 # Configure Streamlit
 st.set_page_config(
