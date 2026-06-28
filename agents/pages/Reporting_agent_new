@@ -1,0 +1,229 @@
+import os
+import json
+from datetime import datetime
+from typing import Dict, Any
+
+# Agno Framework Imports
+from agno.agent import Agent
+from agno.models.google import Gemini
+
+# ReportLab Imports for Production-Grade PDF Layouts
+from reportlab.lib.pagesizes import letter
+from reportlab.lib import colors
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, PageBreak, KeepTogether
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.units import inch
+
+# Define a comprehensive function to generate the Multi-Dimensional PDF Report
+def generate_pdf_report(quotation_data_json: str, output_filename: str = "Cyber_Risk_Insurance_Report.pdf") -> str:
+    """
+    Parses premium pricing and reinsurance agent data to build a publication-quality
+    multi-dimensional actuarial breakdown report in PDF format.
+    """
+    try:
+        data = json.loads(quotation_data_json)
+    except Exception as e:
+        return f"Error parsing input quotation JSON data: {str(e)}"
+    
+    # 1. Setup Document Template
+    doc = SimpleDocTemplate(
+        output_filename,
+        pagesize=letter,
+        rightMargin=54, leftMargin=54, topMargin=54, bottomMargin=54
+    )
+    
+    styles = getSampleStyleSheet()
+    
+    # Custom Color Palette
+    PRIMARY_COLOR = colors.HexColor("#1A365D")   # Deep Corporate Navy
+    SECONDARY_COLOR = colors.HexColor("#2B6CB0") # Slate Blue
+    ACCENT_COLOR = colors.HexColor("#319795")    # Teal Accent
+    NEUTRAL_DARK = colors.HexColor("#2D3748")    # Charcoal Text
+    BG_LIGHT = colors.HexColor("#F7FAFC")        # Soft Light Grey
+    
+    # Custom Styles
+    title_style = ParagraphStyle(
+        'DocTitle', parent=styles['Heading1'],
+        fontSize=24, leading=28, textColor=PRIMARY_COLOR, spaceAfter=6
+    )
+    subtitle_style = ParagraphStyle(
+        'DocSubtitle', parent=styles['Normal'],
+        fontSize=12, leading=16, textColor=SECONDARY_COLOR, spaceAfter=20
+    )
+    h1_style = ParagraphStyle(
+        'SectionH1', parent=styles['Heading2'],
+        fontSize=16, leading=20, textColor=PRIMARY_COLOR, spaceBefore=14, spaceAfter=8,
+        keepWithNext=True
+    )
+    body_style = ParagraphStyle(
+        'BodyDark', parent=styles['Normal'],
+        fontSize=10, leading=14, textColor=NEUTRAL_DARK, spaceAfter=6
+    )
+    bold_body_style = ParagraphStyle(
+        'BodyDarkBold', parent=body_style, fontName='Helvetica-Bold'
+    )
+    
+    story = []
+    
+    # --- HEADER / TITLE SECTION ---
+    story.append(Paragraph("CYBER & AI RISK INSURANCE REPORT", title_style))
+    story.append(Paragraph(f"Generated on: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} | Confidential Underwriting Dossier", subtitle_style))
+    story.append(Spacer(1, 10))
+    
+    # --- SECTION 1: CLIENT RISK PROFILE ---
+    story.append(Paragraph("1. Corporate Risk Profile & Metadata Audit", h1_style))
+    company_info = data.get("company_profile", data.get("client_profile", {}))
+    risk_metrics = data.get("risk_metrics", {})
+    
+    profile_table_data = [
+        [Paragraph("<b>Attribute</b>", body_style), Paragraph("<b>Value</b>", body_style), Paragraph("<b>Actuarial Predictive Metrics</b>", body_style), Paragraph("<b>Value</b>", body_style)],
+        [Paragraph("Company Name", body_style), Paragraph(str(company_info.get("name", "N/A")), body_style), Paragraph("Predicted Annual Incident Frequency", body_style), Paragraph(str(risk_metrics.get("predicted_frequency", "N/A")), body_style)],
+        [Paragraph("Annual Revenue", body_style), Paragraph(f"${company_info.get('revenue', 0):,.0f}", body_style), Paragraph("Expected Incident Severity", body_style), Paragraph(f"${risk_metrics.get('expected_severity', 0):,.0f}", body_style)],
+        [Paragraph("Employee Count", body_style), Paragraph(f"{company_info.get('employees', 0):,}", body_style), Paragraph("Probable Maximum Loss (Q95)", body_style), Paragraph(f"${risk_metrics.get('q95_loss', 0):,.0f}", body_style)],
+        [Paragraph("Industry Classification", body_style), Paragraph(str(company_info.get("industry", "N/A")), body_style), Paragraph("Aggregated Risk Index Score", body_style), Paragraph(f"{risk_metrics.get('risk_score', 'N/A')}/100", body_style)]
+    ]
+    
+    t1 = Table(profile_table_data, colWidths=[1.5*inch, 1.5*inch, 2.5*inch, 1.5*inch])
+    t1.setStyle(TableStyle([
+        ('BACKGROUND', (0,0), (-1,0), BG_LIGHT),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 6),
+        ('TOPPADDING', (0,0), (-1,-1), 6),
+        ('ALIGN', (0,0), (-1,-1), 'LEFT'),
+        ('LINEBELOW', (0,0), (-1,0), 1, SECONDARY_COLOR),
+        ('INNERGRID', (0,0), (-1,-1), 0.5, colors.lightgrey),
+        ('BOX', (0,0), (-1,-1), 1, PRIMARY_COLOR),
+    ]))
+    story.append(t1)
+    story.append(Spacer(1, 15))
+    
+    # --- SECTION 2: PREMIUM STRUCTURE BREAKDOWN ---
+    story.append(Paragraph("2. Actuarial Premium Loading Breakdown", h1_style))
+    premium_calc = data.get("premium_calculations", {})
+    loadings = premium_calc.get("loading_components", {})
+    
+    premium_table_data = [
+        [Paragraph("<b>Premium Component</b>", body_style), Paragraph("<b>Allocation Amount (USD)</b>", body_style), Paragraph("<b>Percentage of Pure Premium</b>", body_style)],
+        [Paragraph("<b>Pure Premium (Baseline Expected Loss)</b>", body_style), Paragraph(f"${premium_calc.get('pure_premium', 0):,.0f}", bold_body_style), Paragraph("100.0%", body_style)],
+        [Paragraph("Acquisition Expenses Loading", body_style), Paragraph(f"${loadings.get('acquisition', 0):,.0f}", body_style), Paragraph("20.0%", body_style)],
+        [Paragraph("Administrative Expenses Loading", body_style), Paragraph(f"${loadings.get('admin', 0):,.0f}", body_style), Paragraph("10.0%", body_style)],
+        [Paragraph("Actuarial Uncertainty Buffer", body_style), Paragraph(f"${loadings.get('uncertainty', 0):,.0f}", body_style), Paragraph("8.0%", body_style)],
+        [Paragraph("Reinsurance Ceded Costs Loading", body_style), Paragraph(f"${loadings.get('reinsurance', 0):,.0f}", body_style), Paragraph("5.0%", body_style)],
+        [Paragraph("Target Profit Margin Allocation", body_style), Paragraph(f"${loadings.get('profit', 0):,.0f}", body_style), Paragraph("15.0%", body_style)],
+        [Paragraph("<b>Total Gross Premium (Annualized)</b>", body_style), Paragraph(f"${premium_calc.get('final_premium', 0):,.0f}", bold_body_style), Paragraph("<b>158.0%</b>", bold_body_style)]
+    ]
+    
+    t2 = Table(premium_table_data, colWidths=[3.0*inch, 2.0*inch, 2.0*inch])
+    t2.setStyle(TableStyle([
+        ('BACKGROUND', (0,0), (-1,0), PRIMARY_COLOR),
+        ('TEXTCOLOR', (0,0), (-1,0), colors.white),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 6),
+        ('TOPPADDING', (0,0), (-1,-1), 6),
+        ('INNERGRID', (0,0), (-1,-1), 0.5, colors.lightgrey),
+        ('LINEABOVE', (0,-1), (-1,-1), 1.5, PRIMARY_COLOR),
+        ('BACKGROUND', (0,-1), (-1,-1), BG_LIGHT),
+        ('BOX', (0,0), (-1,-1), 1, PRIMARY_COLOR),
+    ]))
+    # Quick fix for text visibility inside headers
+    for idx in range(3):
+        premium_table_data[0][idx].style.textColor = colors.white
+    story.append(t2)
+    story.append(Spacer(1, 15))
+    
+    # --- SECTION 3: REINSURANCE PLACEMENT OPTIONS ---
+    story.append(Paragraph("3. Multi-Dimensional Reinsurance Placement Strategy", h1_style))
+    reinsurance = data.get("reinsurance_allocation", {})
+    prop = reinsurance.get("proportional", {})
+    xol = reinsurance.get("excess_of_loss", {})
+    
+    reins_table_data = [
+        [Paragraph("<b>Reinsurance Structure Layer</b>", body_style), Paragraph("<b>Gross Ceded</b>", body_style), Paragraph("<b>Ceding Commission</b>", body_style), Paragraph("<b>Net Retained / Premium Cost</b>", body_style)],
+        [Paragraph("Quota Share Layer (30%)", body_style), Paragraph(f"${prop.get('quota_share', {}).get('gross', 0):,.0f}", body_style), Paragraph(f"${prop.get('quota_share', {}).get('commission', 0):,.0f}", body_style), Paragraph(f"${prop.get('quota_share', {}).get('net', 0):,.0f}", body_style)],
+        [Paragraph("Surplus Share Layer (15%)", body_style), Paragraph(f"${prop.get('surplus_share', {}).get('gross', 0):,.0f}", body_style), Paragraph(f"${prop.get('surplus_share', {}).get('commission', 0):,.0f}", body_style), Paragraph(f"${prop.get('surplus_share', {}).get('net', 0):,.0f}", body_style)],
+        [Paragraph("Excess of Loss (XOL) Layer 1", body_style), Paragraph("-", body_style), Paragraph("-", body_style), Paragraph(f"${xol.get('layer1', {}).get('premium', 0):,.0f}", body_style)],
+        [Paragraph("Excess of Loss (XOL) Layer 2", body_style), Paragraph("-", body_style), Paragraph("-", body_style), Paragraph(f"${xol.get('layer2', {}).get('premium', 0):,.0f}", body_style)],
+        [Paragraph("<b>Hybrid Composite Reinsurance Value</b>", body_style), Paragraph("-", body_style), Paragraph("-", body_style), Paragraph(f"${reinsurance.get('hybrid_total_cost', 0):,.0f}", bold_body_style)]
+    ]
+    
+    t3 = Table(reins_table_data, colWidths=[2.5*inch, 1.5*inch, 1.5*inch, 1.5*inch])
+    t3.setStyle(TableStyle([
+        ('BACKGROUND', (0,0), (-1,0), BG_LIGHT),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 6),
+        ('TOPPADDING', (0,0), (-1,-1), 6),
+        ('INNERGRID', (0,0), (-1,-1), 0.5, colors.lightgrey),
+        ('BOX', (0,0), (-1,-1), 1, PRIMARY_COLOR),
+    ]))
+    story.append(t3)
+    story.append(Spacer(1, 20))
+    
+    # --- SECTION 4: STRATEGIC EXPLANATION & SIGN-OFF ---
+    story.append(Paragraph("4. Underwriting Recommendations & Agent Notes", h1_style))
+    notes = data.get("agent_explanations", "The primary, secondary, and combined product coverages have been calibrated to handle ransomware, zero-day threat liabilities, and systemic cloud outages. Risk-transfer levels match standard enterprise appetites.")
+    story.append(Paragraph(notes, body_style))
+    
+    # Build Document
+    doc.build(story)
+    return f"Successfully generated multidimensional PDF report at: {output_filename}"
+
+# Create the Agent Reporting Deployable Class using Agno and Gemini
+def deploy_reporting_agent():
+    reporting_agent = Agent(
+        name="Cyber Risk Multi-Dimensional Reporting Agent",
+        model=Gemini(id="gemini-2.5-flash"),
+        tools=[generate_pdf_report],
+        description="Consolidates multi-agent actuarial, pricing, and reinsurance variables into a professional PDF document.",
+        instructions=[
+            "You are a Senior Cyber Insurance Underwriting Reporting Agent.",
+            "Your main role is to take raw metrics from the upstream pricing/reinsurance pipeline and transform them into a PDF.",
+            "Ensure that any data formatting conforms to JSON standards prior to invoking the `generate_pdf_report` tool.",
+            "Always state clearly to the user where the compiled document has been saved."
+        ],
+        show_tool_calls=True
+    )
+    return reporting_agent
+
+if __name__ == "__main__":
+    # Example Mock Input simulating the upstream Pricing, Validation, and Reinsurance agent pipelines
+    mock_pipeline_output = {
+        "company_profile": {
+            "name": "Global Tech Logistics Inc",
+            "revenue": 2500000000,
+            "employees": 4500,
+            "industry": "Transportation & Warehousing (NAICS 48-49)"
+        },
+        "risk_metrics": {
+            "predicted_frequency": 0.4581,
+            "expected_severity": 12500000,
+            "q95_loss": 34000000,
+            "risk_score": 68.5
+        },
+        "premium_calculations": {
+            "pure_premium": 5725000,
+            "loading_components": {
+                "acquisition": 1145000,
+                "admin": 572500,
+                "uncertainty": 458000,
+                "reinsurance": 286250,
+                "profit": 858750
+            },
+            "total_loading": 3320500,
+            "final_premium": 9045500
+        },
+        "reinsurance_allocation": {
+            "proportional": {
+                "quota_share": {"gross": 2713650, "commission": 814095, "net": 1899555},
+                "surplus_share": {"gross": 1356825, "commission": 407047, "net": 949778}
+            },
+            "excess_of_loss": {
+                "layer1": {"premium": 450000},
+                "layer2": {"premium": 320000}
+            },
+            "hybrid_total_cost": 3619333
+        },
+        "agent_explanations": "The risk is categorized as Medium-High. It is recommended to deploy the Hybrid reinsurance structure to mitigate systemic breach volatility in transport routing frameworks."
+    }
+
+    agent = deploy_reporting_agent()
+    # Execute agent instruction
+    agent.print_response(
+        f"Generate the comprehensive multi-dimensional cyber insurance report based on this data: {json.dumps(mock_pipeline_output)}"
+    )
