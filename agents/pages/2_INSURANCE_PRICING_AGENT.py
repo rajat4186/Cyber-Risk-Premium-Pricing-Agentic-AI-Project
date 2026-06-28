@@ -21,6 +21,7 @@ import warnings
 from typing import Dict, Tuple, Any
 from datetime import datetime
 import subprocess
+import streamlit as st
 
 warnings.filterwarnings("ignore")
 
@@ -28,6 +29,12 @@ warnings.filterwarnings("ignore")
 #     os.environ["GOOGLE_API_KEY"] = st.secrets["GOOGLE_API_KEY"]
 # else:
 #     st.error("ERROR: GOOGLE_API_KEY not found in Streamlit Secrets. Please set it in .streamlit/secrets.toml")
+
+if "GOOGLE_API_KEY" not in os.environ:
+    if "GOOGLE_API_KEY" in st.secrets:
+        os.environ["GOOGLE_API_KEY"] = st.secrets["GOOGLE_API_KEY"]
+    elif "Final_Project_Key" in st.secrets:
+        os.environ["GOOGLE_API_KEY"] = st.secrets["Final_Project_Key"]
 
 print("=" * 80)
 print("INTEGRATED CYBER RISK QUOTATION AGENT - COMPLETE PIPELINE")
@@ -722,10 +729,6 @@ print(
 print(f"\n✓ All functions working correctly with EXTRACTED coefficients!")
 
 ## [PHASE 7] Hosting App On Streamlit
-
-
-import streamlit as st
-import os
  
 # Configure Streamlit
 st.set_page_config(
@@ -740,11 +743,11 @@ Dynamic actuarial pricing using AI-powered Frequency-Severity models.
 """)
  
 # API Key Setup
-if "GOOGLE_API_KEY" not in os.environ:
-    if "GOOGLE_API_KEY" in st.secrets:
-        os.environ["GOOGLE_API_KEY"] = st.secrets["GOOGLE_API_KEY"]
-    elif "Final_Project_Key" in st.secrets:
-        os.environ["GOOGLE_API_KEY"] = st.secrets["Final_Project_Key"]
+# if "GOOGLE_API_KEY" not in os.environ:
+#     if "GOOGLE_API_KEY" in st.secrets:
+#         os.environ["GOOGLE_API_KEY"] = st.secrets["GOOGLE_API_KEY"]
+#     elif "Final_Project_Key" in st.secrets:
+#         os.environ["GOOGLE_API_KEY"] = st.secrets["Final_Project_Key"]
  
 # Initialize Chat History
 if "messages" not in st.session_state:
