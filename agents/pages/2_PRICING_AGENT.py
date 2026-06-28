@@ -760,44 +760,44 @@ This application utilizes a dynamic **Poisson GLM Frequency Model** and a **Logn
 st.sidebar.header("🏢 Client Company Profile")
 
 # 3. Create interactive input form components
-with st.sidebar.form("underwriting_inputs"):
-    company_name = st.text_input("Company Name", value="TechCorp Inc.")
+
+# Initialize Chat History
+if "messages" not in st.session_state:
+    st.session_state.messages = [
+        {
+            "role": "assistant",
+            "content": "Welcome to the Cyber Insurance Pricing Engine. Please provide your company details to generate a customized quote."
+        }
+    ]
+ 
+# Display Chat History
+for msg in st.session_state.messages:
+    with st.chat_message(msg["role"]):
+        st.markdown(msg["content"])
+ 
+# User Input
+if user_query := st.chat_input("Describe your company or request a quote..."):
+    st.session_state.messages.append({"role": "user", "content": user_query})
     
-    revenue = st.number_input(
-        "Annual Gross Revenue (in USD $)", 
-        min_value=100000, 
-        max_value=500000000000, 
-        value=150000000000, 
-        step=1000000,
-        format="%d"
-    )
-    
-    employees = st.number_input(
-        "Total Employee Count", 
-        min_value=1, 
-        max_value=1000000, 
-        value=250000, 
-        step=1000
-    )
-    
-    industry = st.selectbox(
-        "Industry Sector", 
-        options=["Technology (code 51)", "Finance (code 52)", "Healthcare (code 62)", "Manufacturing (code 31-33)", "Retail (code 44-45)"],
-        index=0
-    )
-    
-    is_public = st.radio("Entity Listing Status", options=["Public Company", "Private Company"], index=0)
-    
-    customer_records = st.number_input(
-        "Total Customer Records Maintained (PwnCount Surface)", 
-        min_value=0, 
-        max_value=1000000000, 
-        value=100000000, 
-        step=1000000
-    )
-    
-    # Form submission button
-    submitted = st.form_submit_button("Generate Premium Quote")
+    with st.chat_message("user"):
+        st.markdown(user_query)
+ 
+    with st.chat_message("assistant"):
+        response_placeholder = st.empty()
+        
+        try:
+            if quotation_agent is not None:
+                agent_response = quotation_agent.run(user_query)
+                output_text = agent_response.content if hasattr(agent_response, 'content') else str(agent_response)
+            else:
+                output_text = "Agent initialization pending. Please check API configuration."
+            
+            response_placeholder.markdown(output_text)
+            st.session_state.messages.append({"role": "assistant", "content": output_text})
+            
+        except Exception as e:
+            error_msg = f"⚠️ Processing error: {str(e)}"
+            response_placeholder.error(error_msg)
 
 # 4. Process user action and prompt the agent
 if submitted:
