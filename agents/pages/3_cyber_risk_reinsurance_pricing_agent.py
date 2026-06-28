@@ -414,7 +414,7 @@ st.markdown("Interact with the actuarial AI agent to dynamically price risk laye
 # 2. Secure API Key Management via Streamlit Secrets
 if "GOOGLE_API_KEY" not in os.environ:
     if "GEMINI_API_KEY" in st.secrets:
-        os.environ["GOOGLE_API_KEY"] = st.secrets["GEMINI_API_KEY"]
+        os.environ["GOOGLE_API_KEY"] = st.secrets["Actuarial_project"]
     elif "GOOGLE_API_KEY" in st.secrets:
         os.environ["GOOGLE_API_KEY"] = st.secrets["GOOGLE_API_KEY"]
     else:
