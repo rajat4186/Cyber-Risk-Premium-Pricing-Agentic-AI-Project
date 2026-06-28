@@ -17,14 +17,14 @@ st.set_page_config(
 homepage = st.Page(
     page="WELCOME.py", 
     title="Dashboard Home", 
-    icon="🏠", 
+    icon="💻", 
     default=True
 )
 
 data_validation_agent = st.Page(
     page="pages/1_DATA_VALIDATION_AGENT.py", 
     title="Data Validation Agent", 
-    icon="🔍"
+    icon="✅"
 )
 
 insurance_pricing_agent = st.Page(
@@ -36,7 +36,7 @@ insurance_pricing_agent = st.Page(
 reinsurance_pricing_agent = st.Page(
     page="pages/3_REINSURANCE_PRICING_AGENT.py", 
     title="Reinsurance Pricing Agent", 
-    icon="⛓️"
+    icon="🧱"
 )
 
 reporting_agent = st.Page(
