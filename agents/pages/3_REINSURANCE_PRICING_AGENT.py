@@ -21,6 +21,19 @@ np.random.seed(42)
 pd.set_option('display.max_columns', 50)
 pd.set_option('display.width', 120)
 
+# API Key Management
+if "GOOGLE_API_KEY" not in os.environ:
+    if "GEMINI_API_KEY" in st.secrets:
+        os.environ["GOOGLE_API_KEY"] = st.secrets["GEMINI_API_KEY"]
+    elif "GOOGLE_API_KEY" in st.secrets:
+        os.environ["GOOGLE_API_KEY"] = st.secrets["GOOGLE_API_KEY"]
+    elif "Final_Project_Key" in st.secrets:
+        os.environ["GOOGLE_API_KEY"] = st.secrets["Final_Project_Key"]
+    else:
+        st.error("ERROR: GOOGLE_API_KEY not found in Streamlit Secrets. Please set it in .streamlit/secrets.toml")
+else:
+    st.error("ERROR: GOOGLE_API_KEY not found in Streamlit Secrets. Please set it in .streamlit/secrets.toml")
+
 # ============================================================================
 # DYNAMIC PREMIUM STATISTICS CALCULATION
 # ============================================================================
@@ -276,16 +289,16 @@ try:
     from agno.models.google import Gemini
     
     # API Key Setup with multi-path fallback
-    if "GOOGLE_API_KEY" not in os.environ:
-        try:
-            from google.colab import userdata
-            os.environ["GOOGLE_API_KEY"] = userdata.get("Final_Project_Key")
-        except (ImportError, Exception):
-            # Fallback: Check environment or allow graceful degradation
-            if "GOOGLE_API_KEY" not in os.environ:
-                print("⚠️  Warning: GOOGLE_API_KEY not configured")
-                print("    Set via environment: export GOOGLE_API_KEY='your-key'")
-                print("    Or Streamlit secrets: .streamlit/secrets.toml")
+    # if "GOOGLE_API_KEY" not in os.environ:
+    #     try:
+    #         from google.colab import userdata
+    #         os.environ["GOOGLE_API_KEY"] = userdata.get("Final_Project_Key")
+    #     except (ImportError, Exception):
+    #         # Fallback: Check environment or allow graceful degradation
+    #         if "GOOGLE_API_KEY" not in os.environ:
+    #             print("⚠️  Warning: GOOGLE_API_KEY not configured")
+    #             print("    Set via environment: export GOOGLE_API_KEY='your-key'")
+    #             print("    Or Streamlit secrets: .streamlit/secrets.toml")
     
     quotation_agent = Agent(
         name='Cyber Risk Quotation Agent',
@@ -337,14 +350,14 @@ st.set_page_config(
 st.title("🌐 Cyber & AI Reinsurance Quotation Agent")
 st.markdown("Dynamic actuarial pricing for commercial cyber risk reinsurance.")
 
-# API Key Management
-if "GOOGLE_API_KEY" not in os.environ:
-    if "GEMINI_API_KEY" in st.secrets:
-        os.environ["GOOGLE_API_KEY"] = st.secrets["GEMINI_API_KEY"]
-    elif "GOOGLE_API_KEY" in st.secrets:
-        os.environ["GOOGLE_API_KEY"] = st.secrets["GOOGLE_API_KEY"]
-    elif "Final_Project_Key" in st.secrets:
-        os.environ["GOOGLE_API_KEY"] = st.secrets["Final_Project_Key"]
+# # API Key Management
+# if "GOOGLE_API_KEY" not in os.environ:
+#     if "GEMINI_API_KEY" in st.secrets:
+#         os.environ["GOOGLE_API_KEY"] = st.secrets["GEMINI_API_KEY"]
+#     elif "GOOGLE_API_KEY" in st.secrets:
+#         os.environ["GOOGLE_API_KEY"] = st.secrets["GOOGLE_API_KEY"]
+#     elif "Final_Project_Key" in st.secrets:
+#         os.environ["GOOGLE_API_KEY"] = st.secrets["Final_Project_Key"]
 
 # Initialize Chat History
 if "messages" not in st.session_state:
