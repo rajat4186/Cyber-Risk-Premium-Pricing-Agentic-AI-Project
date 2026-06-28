@@ -40,7 +40,7 @@ reinsurance_pricing_agent = st.Page(
 )
 
 reporting_agent = st.Page(
-    page="pages/4_REPORTING_AGENT.py", 
+    page="pages/Reporting_agent_new.py", 
     title="Reporting Agent", 
     icon="📋"
 )
