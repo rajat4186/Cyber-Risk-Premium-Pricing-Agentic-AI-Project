@@ -118,7 +118,7 @@ else:
             st.markdown("#### 📊 2. Insurance Pricing Agent")
             st.markdown(
                 """
-                Houses the core predictive mathematical modeling stack. Marries the **Poisson GLM Frequency Model** with empirical severity loss estimations to calculate Risk Premiums. 
+                Houses the core predictive mathematical modeling stack. Marries the GLM frequency model with empirical severity loss estimations to calculate risk premiums. 
                 Applies risk loading factors across Primary (Tier 1) and Secondary (Tier 2) attack profiles.
                 """
             )
