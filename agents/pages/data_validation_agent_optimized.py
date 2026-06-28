@@ -15,32 +15,32 @@ from agno.models.google import Gemini
 # ----------------------------------------------------
 # API Key Setup
 # ----------------------------------------------------
-if "GOOGLE_API_KEY" not in os.environ:
-    if "GEMINI_API_KEY" in st.secrets:
-        os.environ["GOOGLE_API_KEY"] = st.secrets["GEMINI_API_KEY"]
-    elif "GOOGLE_API_KEY" in st.secrets:
-        os.environ["GOOGLE_API_KEY"] = st.secrets["GOOGLE_API_KEY"]
-    elif "Capstone_Project" in st.secrets:
-        os.environ["GOOGLE_API_KEY"] = st.secrets["Capstone_Project"]
+# if "GOOGLE_API_KEY" not in os.environ:
+#     if "GEMINI_API_KEY" in st.secrets:
+#         os.environ["GOOGLE_API_KEY"] = st.secrets["GEMINI_API_KEY"]
+#     elif "GOOGLE_API_KEY" in st.secrets:
+#         os.environ["GOOGLE_API_KEY"] = st.secrets["GOOGLE_API_KEY"]
+#     elif "Capstone_Project" in st.secrets:
+#         os.environ["GOOGLE_API_KEY"] = st.secrets["Capstone_Project"]
 
-if "GEMINI_API_KEY" not in os.environ:
-    if "GEMINI_API_KEY" in st.secrets:
-        os.environ["GEMINI_API_KEY"] = st.secrets["GEMINI_API_KEY"]
-    elif "GOOGLE_API_KEY" in st.secrets:
-        os.environ["GEMINI_API_KEY"] = st.secrets["GOOGLE_API_KEY"]
-    elif "Capstone_Project" in st.secrets:
-        os.environ["GEMINI_API_KEY"] = st.secrets["Capstone_Project"]
+# if "GEMINI_API_KEY" not in os.environ:
+#     if "GEMINI_API_KEY" in st.secrets:
+#         os.environ["GEMINI_API_KEY"] = st.secrets["GEMINI_API_KEY"]
+#     elif "GOOGLE_API_KEY" in st.secrets:
+#         os.environ["GEMINI_API_KEY"] = st.secrets["GOOGLE_API_KEY"]
+#     elif "Capstone_Project" in st.secrets:
+#         os.environ["GEMINI_API_KEY"] = st.secrets["Capstone_Project"]
 
-try:
-    from google.colab import userdata
-    colab_key = userdata.get('Capstone_Project') or userdata.get('GEMINI_API_KEY') or userdata.get('GOOGLE_API_KEY')
-    if colab_key:
-        if "GOOGLE_API_KEY" not in os.environ:
-            os.environ["GOOGLE_API_KEY"] = colab_key
-        if "GEMINI_API_KEY" not in os.environ:
-            os.environ["GEMINI_API_KEY"] = colab_key
-except (ImportError, Exception):
-    pass
+# try:
+#     from google.colab import userdata
+#     colab_key = userdata.get('Capstone_Project') or userdata.get('GEMINI_API_KEY') or userdata.get('GOOGLE_API_KEY')
+#     if colab_key:
+#         if "GOOGLE_API_KEY" not in os.environ:
+#             os.environ["GOOGLE_API_KEY"] = colab_key
+#         if "GEMINI_API_KEY" not in os.environ:
+#             os.environ["GEMINI_API_KEY"] = colab_key
+# except (ImportError, Exception):
+#     pass
 
 # Initialize the Gemini Client
 client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
