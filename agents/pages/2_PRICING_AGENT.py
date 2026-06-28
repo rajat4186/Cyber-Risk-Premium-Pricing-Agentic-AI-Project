@@ -44,10 +44,6 @@ from sklearn.model_selection import train_test_split
 
 print("✓ Dependencies installed")
 
-"""## [PHASE 1] Load Data From CSV Files
-Load and inspect the core data sources containing past cyber incidents, financial loss histories, and broader market data impacts.
-"""
-
 print("\n[PHASE 1] Loading incident data from CSV files...")
 
 try:
@@ -83,10 +79,6 @@ except Exception as e:
     DATA_AVAILABLE = False
     incidents = None
     financial = None
-
-"""## [PHASE 1.5] Train & Extract Poisson Frequency Model Coefficients
-Aggregate frequency data per company and train a Poisson generalized linear model with Ridge regularization to estimate how company specific attributes determine event frequency.
-"""
 
 print("\n[PHASE 1.5] Training Poisson GLM Frequency Model...")
 
@@ -179,10 +171,6 @@ if DATA_AVAILABLE and incidents is not None:
 else:
     raise Exception("Frequency model training failed")
 
-"""## [PHASE 2] Train & Extract Lognormal Severity Model Coefficients
-Fit a Lognormal distribution to historical loss data and leverage Ridge regression to project loss sizes based on firm size and exposure parameters.
-"""
-
 print("\n[PHASE 2] Training Lognormal Severity Model...")
 
 def train_severity_model(incidents_df, financial_df):
@@ -265,10 +253,6 @@ if DATA_AVAILABLE and incidents is not None and financial is not None:
 else:
     raise Exception("Severity model training failed")
 
-"""## [PHASE 3] Initialize Loading Factors & Reference Data
-Define the baseline parameters required for insurance quoting, including administrative expense loading components, industry-specific risk relativities, and enterprise size bounds.
-"""
-
 print("\n[PHASE 3] Initializing quotation system with extracted coefficients...")
 
 LOADING_FACTORS = {
@@ -327,10 +311,6 @@ print(f"  • Frequency coefficients: {list(FREQ_COEFFICIENTS.keys())}")
 print(f"  • Severity coefficients: {list(SEVER_COEFFICIENTS.keys())}")
 print(f"  • Lognormal parameters: μ={LOGNORM_PARAMS['mu']:.4f}, σ={LOGNORM_PARAMS['sigma']:.4f}")
 print(f"  • Loading factors: {TOTAL_LOADING * 100:.1f}%")
-
-"""## [PHASE 3.5] Prediction Functions with Extracted Coefficients
-Define the quantitative actuarial valuation routines using the parameters learned directly from Phase 1.5 and Phase 2.
-"""
 
 print("\n[PHASE 3.5] Defining prediction functions with EXTRACTED coefficients...")
 
@@ -440,10 +420,6 @@ def generate_coverage_tiers(final_premium: float) -> dict:
     }
 
 print("✓ Prediction functions defined with EXTRACTED coefficients")
-
-"""## [PHASE 4] Define Agent Tools
-Wrap the underlying risk prediction and policy engine inside Python functions exposed as standardized semantic tools for the AI agent.
-"""
 
 print("\n[PHASE 4] Defining agent tools...")
 
@@ -584,9 +560,9 @@ def compare_coverage_costs(tier1_premium: float) -> str:
 
 print("✓ Agent tools defined")
 
-"""## [PHASE 5] Create Agentic AI Quotation Agent
-Configure the Agno Agent object using Gemini 2.5 Flash, providing instructions and attaching the actuarial underwriting rulesets.
-"""
+## [PHASE 5] Create Agentic AI Quotation Agent
+## Configure the Agno Agent object using Gemini 2.5 Flash, providing instructions and attaching the actuarial underwriting rulesets.
+
 
 print("\n[PHASE 5] Creating Agentic AI quotation agent...")
 
@@ -649,9 +625,9 @@ Be professional, clear, and business-focused in your explanations.""",
 quotation_agent = create_quotation_agent()
 print("✓ Agentic AI agent created and ready")
 
-"""## [PHASE 6] Pipeline Verification & Actuarial Summary
-Verify complete extraction accuracy across all pipeline steps and log out final risk factors.
-"""
+## [PHASE 6] Pipeline Verification & Actuarial Summary
+# Verify complete extraction accuracy across all pipeline steps and log out final risk factors.
+
 
 print("\n" + "=" * 80)
 print("✓ INTEGRATED PIPELINE COMPLETE AND READY")
@@ -683,9 +659,9 @@ print(f"\n🚀 AGENT READY FOR QUERIES")
 print(f"\nUsage:")
 print(f"  quotation_agent.print_response('Your query here')")
 
-"""## [BONUS] Local Risk Validation & Evaluation Testing
-Execute a comprehensive sanity test locally to verify standard premium calculation values prior to calling the LLM orchestrator.
-"""
+## [BONUS] Local Risk Validation & Evaluation Testing
+# Execute a comprehensive sanity test locally to verify standard premium calculation values prior to calling the LLM orchestrator.
+
 
 print(f"\n[BONUS] Testing predictions with EXTRACTED coefficients locally...")
 
@@ -733,8 +709,8 @@ print(
 
 print(f"\n✓ All functions working correctly with EXTRACTED coefficients!")
 
-"""## [PHASE 7] Hosting App On Streamlit
-"""
+## [PHASE 7] Hosting App On Streamlit
+
 
 import streamlit as st
 import os
