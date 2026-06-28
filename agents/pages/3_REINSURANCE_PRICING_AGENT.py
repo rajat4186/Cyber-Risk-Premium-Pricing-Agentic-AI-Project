@@ -335,7 +335,7 @@ st.set_page_config(
 )
 
 st.title("🌐 Cyber & AI Reinsurance Quotation Agent")
-st.markdown("Dynamic actuarial pricing for commercial cyber and AI risk insurance.")
+st.markdown("Dynamic actuarial pricing for commercial cyber risk reinsurance.")
 
 # API Key Management
 if "GOOGLE_API_KEY" not in os.environ:
