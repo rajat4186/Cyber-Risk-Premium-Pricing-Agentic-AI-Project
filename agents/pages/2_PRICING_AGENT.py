@@ -742,25 +742,26 @@ print(f"\n✓ All functions working correctly with EXTRACTED coefficients!")
 
 import streamlit as st
 import os
-
-# 1. Securely initialize the Gemini API Key using Streamlit Secrets
-if "GOOGLE_API_KEY" in st.secrets:
-    os.environ["GOOGLE_API_KEY"] = st.secrets["GOOGLE_API_KEY"]
-else:
-    st.error("ERROR: GOOGLE_API_KEY not found in Streamlit Secrets. Please set it in .streamlit/secrets.toml")
-
-# 2. Streamlit UI Layout Design
-st.set_page_config(page_title="AI Cyber Insurance Pricing Engine", layout="wide")
-
-st.title("🛡️ Autonomous Agentic Cyber & AI Risk Pricing Engine")
+ 
+# Configure Streamlit
+st.set_page_config(
+    page_title="Cyber & AI Risk Insurance Pricing",
+    page_icon="🛡️",
+    layout="wide"
+)
+ 
+st.title("🛡️ Cyber & AI Risk Insurance Pricing Engine")
 st.markdown("""
-This application utilizes a dynamic **Poisson GLM Frequency Model** and a **Lognormal Severity Model** managed by an **Agno + Gemini AI Agent** to generate customized commercial insurance and reinsurance quotes.
+Dynamic actuarial pricing using AI-powered Frequency-Severity models.
 """)
-
-st.sidebar.header("🏢 Client Company Profile")
-
-# 3. Create interactive input form components
-
+ 
+# API Key Setup
+if "GOOGLE_API_KEY" not in os.environ:
+    if "GOOGLE_API_KEY" in st.secrets:
+        os.environ["GOOGLE_API_KEY"] = st.secrets["GOOGLE_API_KEY"]
+    elif "Final_Project_Key" in st.secrets:
+        os.environ["GOOGLE_API_KEY"] = st.secrets["Final_Project_Key"]
+ 
 # Initialize Chat History
 if "messages" not in st.session_state:
     st.session_state.messages = [
@@ -798,27 +799,5 @@ if user_query := st.chat_input("Describe your company or request a quote..."):
         except Exception as e:
             error_msg = f"⚠️ Processing error: {str(e)}"
             response_placeholder.error(error_msg)
-
-# 4. Process user action and prompt the agent
-if submitted:
-    with st.spinner("Analyzing historical incident data matrices and generating pricing quote..."):
-        try:
-            # Dynamically assemble the user input variables into a natural language prompt string
-            compiled_query = (
-                f"Generate a quote for {company_name}, ${revenue:,} revenue, {employees:,} employees, "
-                f"{industry}, {is_public.lower()}, {customer_records:,} customer records"
-            )
-            
-            # Execute the Agno quotation agent
-            # Ensure quotation_agent is the instance initialized earlier in your pipeline script
-            response = quotation_agent.run(compiled_query)
-            
-            # 5. Render outputs clearly on the dashboard UI
-            st.success("✓ Underwriting Review Completed Successfully!")
-            
-            st.subheader("📊 Structured Premium Summary & Risk Evaluation")
-            st.markdown(response.content)
-            
-        except Exception as e:
-            st.error(f"An execution error occurred during calculation routing: {e}")
-            st.info("Check your underlying GLM coefficients or dataset path structures.")
+ 
+print("✓ Application ready for deployment")
