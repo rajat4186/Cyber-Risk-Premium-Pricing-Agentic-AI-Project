@@ -35,6 +35,10 @@ if "GOOGLE_API_KEY" not in os.environ:
         os.environ["GOOGLE_API_KEY"] = st.secrets["GOOGLE_API_KEY"]
     elif "Final_Project_Key" in st.secrets:
         os.environ["GOOGLE_API_KEY"] = st.secrets["Final_Project_Key"]
+    else:
+        st.error("ERROR: GOOGLE_API_KEY not found in Streamlit Secrets. Please set it in .streamlit/secrets.toml")
+else:
+    st.error("ERROR: GOOGLE_API_KEY not found in Streamlit Secrets. Please set it in .streamlit/secrets.toml")
 
 print("=" * 80)
 print("INTEGRATED CYBER RISK QUOTATION AGENT - COMPLETE PIPELINE")
