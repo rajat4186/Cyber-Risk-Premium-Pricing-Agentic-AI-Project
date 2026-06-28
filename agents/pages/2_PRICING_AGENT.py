@@ -33,10 +33,6 @@ print("=" * 80)
 print("INTEGRATED CYBER RISK QUOTATION AGENT - COMPLETE PIPELINE")
 print("=" * 80)
 
-"""## [PHASE 0] Installing Dependencies
-Install required libraries for data manipulation, statistical modeling, and the Agentic framework.
-"""
-
 print("\n[PHASE 0] Installing dependencies...")
 # !pip install -q agno google-genai scipy scikit-learn pandas numpy matplotlib
 
