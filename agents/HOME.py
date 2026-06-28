@@ -40,7 +40,7 @@ with col1:
     st.markdown("👉 *Navigate to **Data Validation** in the sidebar to clean new files.*")
 
 with col2:
-    st.image("https://img.icons8.com/fluent/96/000000/file-insurance.png", width=64)  # Placeholder Icon
+    st.image("https://icons8.com/icon/0tpqgxISselU/cyber-security", width=64)  # Placeholder Icon
     st.markdown("## 📊 Agent 2: Cyber Insurance Pricing")
     st.markdown("""
     **Objective:** Evaluates unique corporate risk parameters to calculate granular, actuarially loaded premium brackets.
