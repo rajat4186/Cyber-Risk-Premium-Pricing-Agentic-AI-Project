@@ -33,6 +33,8 @@ print("=" * 80)
 print("INTEGRATED CYBER RISK QUOTATION AGENT - COMPLETE PIPELINE")
 print("=" * 80)
 
+## PHASE 0
+
 print("\n[PHASE 0] Installing dependencies...")
 # !pip install -q agno google-genai scipy scikit-learn pandas numpy matplotlib
 
@@ -43,6 +45,8 @@ from sklearn.linear_model import Ridge, PoissonRegressor
 from sklearn.model_selection import train_test_split
 
 print("✓ Dependencies installed")
+
+## PHASE 1
 
 print("\n[PHASE 1] Loading incident data from CSV files...")
 
@@ -79,6 +83,8 @@ except Exception as e:
     DATA_AVAILABLE = False
     incidents = None
     financial = None
+
+## PHASE 1.5
 
 print("\n[PHASE 1.5] Training Poisson GLM Frequency Model...")
 
@@ -171,6 +177,8 @@ if DATA_AVAILABLE and incidents is not None:
 else:
     raise Exception("Frequency model training failed")
 
+## PHASE 2
+
 print("\n[PHASE 2] Training Lognormal Severity Model...")
 
 def train_severity_model(incidents_df, financial_df):
@@ -252,6 +260,8 @@ if DATA_AVAILABLE and incidents is not None and financial is not None:
     SEVER_COEFFICIENTS, LOGNORM_PARAMS = train_severity_model(incidents, financial)
 else:
     raise Exception("Severity model training failed")
+
+## PHASE 3
 
 print("\n[PHASE 3] Initializing quotation system with extracted coefficients...")
 
@@ -420,6 +430,8 @@ def generate_coverage_tiers(final_premium: float) -> dict:
     }
 
 print("✓ Prediction functions defined with EXTRACTED coefficients")
+
+## PHASE 4
 
 print("\n[PHASE 4] Defining agent tools...")
 
