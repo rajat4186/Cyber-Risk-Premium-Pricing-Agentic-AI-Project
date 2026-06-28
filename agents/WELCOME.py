@@ -147,3 +147,9 @@ else:
         """,
         unsafe_allow_html=True
     )
+
+
+# SETTING UP API KEY
+
+if "GOOGLE_API_KEY" in st.secrets:
+    os.environ["GOOGLE_API_KEY"] = st.secrets["GOOGLE_API_KEY"]
