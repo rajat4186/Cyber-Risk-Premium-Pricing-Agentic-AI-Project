@@ -351,7 +351,8 @@ if "messages" not in st.session_state:
     st.session_state.messages = [
         {
             "role": "assistant",
-            "content": "Hello! I am your Reinsurance Quotation Agent. Ask me to generate a quote for your company (e.g., 'Generate a reinsurance quote for TechCorp with $5B revenue in Technology'). Minimum revenue: $100M."
+            "content": "Hello! I am your Reinsurance Quotation Agent. Ask me to generate a quote for your company (e.g., 'Generate a reinsurance quote for TechCorp with USD 5B revenue in Technology')"
+            # minimum USD 100M
         }
     ]
 
