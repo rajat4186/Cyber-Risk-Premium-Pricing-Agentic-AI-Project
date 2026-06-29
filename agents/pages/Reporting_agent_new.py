@@ -124,6 +124,16 @@ INDUSTRY_DATA = {
     '22': {'name': 'Utilities', 'relativity': 0.885},
     '42': {'name': 'Business Services', 'relativity': 0.804},
     '55': {'name': 'Management of Companies', 'relativity': 1.417}
+    '48-49': {'name': 'Transportation & Warehousing', 'relativity': 1.000},
+    '11': {'name': 'Agriculture, Forestry & Fishing', 'relativity': 1.000},
+    '72': {'name': 'Accommodation & Food Services', 'relativity': 1.000},
+    '61': {'name': 'Educational Services', 'relativity': 1.000},
+    '53': {'name': 'Real Estate & Rental', 'relativity': 1.000},
+    '54': {'name': 'Professional Services', 'relativity': 1.000},
+    '56': {'name': 'Administrative & Support', 'relativity': 1.000},
+    '81': {'name': 'Other Services', 'relativity': 1.000},
+    '71': {'name': 'Arts, Entertainment & Recreation', 'relativity': 1.000},
+    '23': {'name': 'Construction', 'relativity': 1.000},
 }
 
 REVENUE_TIER_RANGES = {
