@@ -295,30 +295,30 @@ if uploaded_file is not None:
 # ----------------------------------------------------
 # Optional Local Folder Batch Tooling (Safely Encapsulated)
 # ----------------------------------------------------
-st.markdown("---")
-st.subheader("🤖 Batch Local Validation Tool")
-st.caption("Clean raw files stored in your project's data directory locally without halting your browser interface.")
+# st.markdown("---")
+# st.subheader("🤖 Batch Local Validation Tool")
+# st.caption("Clean raw files stored in your project's data directory locally without halting your browser interface.")
 
-if st.button("Scan & Batch Clean Local Folder"):
-    with st.spinner("Locating datasets in data/ directory..."):
-        agent = FullyAgenticValidator()
-        data_folder = "data"
-        if not os.path.exists(data_folder):
-            os.makedirs(data_folder)
+# if st.button("Scan & Batch Clean Local Folder"):
+#     with st.spinner("Locating datasets in data/ directory..."):
+#         agent = FullyAgenticValidator()
+#         data_folder = "data"
+#         if not os.path.exists(data_folder):
+#             os.makedirs(data_folder)
             
-        csv_files = glob.glob(os.path.join(data_folder, "*.csv"))
-        files_to_clean = [f for f in csv_files if "_cleaned" not in f]
+#         csv_files = glob.glob(os.path.join(data_folder, "*.csv"))
+#         files_to_clean = [f for f in csv_files if "_cleaned" not in f]
         
-        if not files_to_clean:
-            st.warning(f"No raw CSV files found to process in local folder '{data_folder}'!")
-        else:
-            st.info(f"Found {len(files_to_clean)} local targets. Beginning direct execution processing...")
-            for file_path in files_to_clean:
-                st.write(f"🔄 Currently processing: `{os.path.basename(file_path)}`")
-                raw_df = pd.read_csv(file_path)
-                processed_df = agent.execute_agent_pipeline(raw_df, os.path.basename(file_path))
+#         if not files_to_clean:
+#             st.warning(f"No raw CSV files found to process in local folder '{data_folder}'!")
+#         else:
+#             st.info(f"Found {len(files_to_clean)} local targets. Beginning direct execution processing...")
+#             for file_path in files_to_clean:
+#                 st.write(f"🔄 Currently processing: `{os.path.basename(file_path)}`")
+#                 raw_df = pd.read_csv(file_path)
+#                 processed_df = agent.execute_agent_pipeline(raw_df, os.path.basename(file_path))
                 
-                output_path = file_path.replace(".csv", "_cleaned.csv")
-                processed_df.to_csv(output_path, index=False)
-                st.success(f"💾 Saved fully validated asset to: `{output_path}`")
-            st.success("🎉 All local datasets have been successfully processed!")
+#                 output_path = file_path.replace(".csv", "_cleaned.csv")
+#                 processed_df.to_csv(output_path, index=False)
+#                 st.success(f"💾 Saved fully validated asset to: `{output_path}`")
+#             st.success("🎉 All local datasets have been successfully processed!")
