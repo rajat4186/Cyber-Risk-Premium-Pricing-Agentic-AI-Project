@@ -471,7 +471,7 @@ def premium_quotation_tool(
 
         premium_calc = calculate_pure_premium(frequency, severity)
         base_final_premium = premium_calc["final_premium"]
-        adjusted_premium = base_final_premium * industry_rel * revenue_rel
+        adjusted_premium = base_final_premium * industry_rel # * revenue_rel
         coverage_tiers = generate_coverage_tiers(adjusted_premium)
 
         quotation = {
