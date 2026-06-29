@@ -303,7 +303,7 @@ try:
     
     quotation_agent = Agent(
         name='Cyber Risk Quotation Agent',
-        model=Gemini(id='gemini-2.5-flash'),
+        model=Gemini(id='gemini-3.1-flash-lite'),
         tools=[quotation_tool],
         description='Generates insurance and reinsurance quotes for cyber/AI risk',
         instructions=f'''You are an insurance actuarial agent specializing in cyber and AI risk pricing.
