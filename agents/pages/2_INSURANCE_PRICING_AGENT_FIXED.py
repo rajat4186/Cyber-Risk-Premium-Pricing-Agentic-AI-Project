@@ -132,7 +132,7 @@ def train_frequency_model(incidents_df):
         X_freq["log_revenue"] = np.log1p(X_freq["company_revenue_usd"])
         X_freq["log_employees"] = np.log1p(X_freq["employee_count"])
 
-        Company size category
+        # Company size category
         X_freq["revenue_tier"] = pd.cut(
             X_freq["company_revenue_usd"],
             bins=[0, 1e9, 10e9, 100e9, np.inf],
