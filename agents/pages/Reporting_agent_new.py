@@ -124,7 +124,7 @@ INDUSTRY_DATA = {
     '22': {'name': 'Utilities', 'relativity': 0.885},
     '42': {'name': 'Business Services', 'relativity': 0.804},
     '55': {'name': 'Management of Companies', 'relativity': 1.417}
-    # '48-49': {'name': 'Transportation & Warehousing', 'relativity': 1.000},
+    '48-49': {'name': 'Transportation & Warehousing', 'relativity': 1.000},
     # '11': {'name': 'Agriculture, Forestry & Fishing', 'relativity': 1.000},
     # '72': {'name': 'Accommodation & Food Services', 'relativity': 1.000},
     # '61': {'name': 'Educational Services', 'relativity': 1.000},
