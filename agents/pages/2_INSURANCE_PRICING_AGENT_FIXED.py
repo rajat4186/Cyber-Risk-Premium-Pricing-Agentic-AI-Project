@@ -584,7 +584,7 @@ def compare_coverage_costs(tier1_premium: float) -> str:
 print("✓ Agent tools defined")
 
 ## [PHASE 5] Create Agentic AI Quotation Agent
-## Configure the Agno Agent object using Gemini 2.5 Flash, providing instructions and attaching the actuarial underwriting rulesets.
+## Configure the Agno Agent object using Gemini 3.1 Flash Lite, providing instructions and attaching the actuarial underwriting rulesets.
 
 
 print("\n[PHASE 5] Creating Agentic AI quotation agent...")
