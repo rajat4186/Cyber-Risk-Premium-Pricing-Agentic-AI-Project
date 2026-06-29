@@ -132,18 +132,18 @@ def train_frequency_model(incidents_df):
         X_freq["log_revenue"] = np.log1p(X_freq["company_revenue_usd"])
         X_freq["log_employees"] = np.log1p(X_freq["employee_count"])
 
-        # Company size category
-        # X_freq["revenue_tier"] = pd.cut(
-        #     X_freq["company_revenue_usd"],
-        #     bins=[0, 1e9, 10e9, 100e9, np.inf],
-        #     labels=[0, 1, 2, 3],
-        # ).astype(int)
+        Company size category
+        X_freq["revenue_tier"] = pd.cut(
+            X_freq["company_revenue_usd"],
+            bins=[0, 1e9, 10e9, 100e9, np.inf],
+            labels=[0, 1, 2, 3],
+        ).astype(int)
 
         feature_cols = [
             "log_revenue",
             "log_employees",
             "is_public_company",
-            # "revenue_tier",
+            "revenue_tier",
         ]
         X_freq_model = X_freq[feature_cols].fillna(0)
 
@@ -300,12 +300,12 @@ INDUSTRY_RELATIVITIES = {
     "55": 1.417,
 }
 
-# REVENUE_TIER_RANGES = {
-#     "Q1_Small": (0, 1e9),
-#     "Q2_Medium": (1e9, 10e9),
-#     "Q3_Large": (10e9, 100e9),
-#     "Q4_Enterprise": (100e9, float("inf")),
-# }
+REVENUE_TIER_RANGES = {
+    "Q1_Small": (0, 1e9),
+    "Q2_Medium": (1e9, 10e9),
+    "Q3_Large": (10e9, 100e9),
+    "Q4_Enterprise": (100e9, float("inf")),
+}
 
 # REVENUE_TIER_RELATIVITIES = {
 #     "Q1_Small": 0.346,
