@@ -29,13 +29,13 @@ data_validation_agent = st.Page(
 )
 
 insurance_pricing_agent = st.Page(
-    page="pages/2_INSURANCE_PRICING_AGENT.py", 
+    page="pages/2_INSURANCE_PRICING_AGENT_FIXED.py", 
     title="Insurance Pricing Agent", 
     icon="📊"
 )
 
 reinsurance_pricing_agent = st.Page(
-    page="pages/3_REINSURANCE_PRICING_AGENT.py", 
+    page="pages/3_REINSURANCE_PRICING_AGENT_FIXED.py", 
     title="Reinsurance Pricing Agent", 
     icon="🧱"
 )
