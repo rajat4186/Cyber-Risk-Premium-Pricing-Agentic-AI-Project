@@ -133,17 +133,17 @@ def train_frequency_model(incidents_df):
         X_freq["log_employees"] = np.log1p(X_freq["employee_count"])
 
         # Company size category
-        X_freq["revenue_tier"] = pd.cut(
-            X_freq["company_revenue_usd"],
-            bins=[0, 1e9, 10e9, 100e9, np.inf],
-            labels=[0, 1, 2, 3],
-        ).astype(int)
+        # X_freq["revenue_tier"] = pd.cut(
+        #     X_freq["company_revenue_usd"],
+        #     bins=[0, 1e9, 10e9, 100e9, np.inf],
+        #     labels=[0, 1, 2, 3],
+        # ).astype(int)
 
         feature_cols = [
             "log_revenue",
             "log_employees",
             "is_public_company",
-            "revenue_tier",
+            # "revenue_tier",
         ]
         X_freq_model = X_freq[feature_cols].fillna(0)
 
@@ -164,7 +164,7 @@ def train_frequency_model(incidents_df):
             "log_revenue": float(freq_model.coef_[0]),
             "log_employees": float(freq_model.coef_[1]),
             "is_public": float(freq_model.coef_[2]),
-            "revenue_tier": float(freq_model.coef_[3]),
+            # "revenue_tier": float(freq_model.coef_[3]),
         }
 
         # Performance metrics
@@ -300,19 +300,19 @@ INDUSTRY_RELATIVITIES = {
     "55": 1.417,
 }
 
-REVENUE_TIER_RANGES = {
-    "Q1_Small": (0, 1e9),
-    "Q2_Medium": (1e9, 10e9),
-    "Q3_Large": (10e9, 100e9),
-    "Q4_Enterprise": (100e9, float("inf")),
-}
+# REVENUE_TIER_RANGES = {
+#     "Q1_Small": (0, 1e9),
+#     "Q2_Medium": (1e9, 10e9),
+#     "Q3_Large": (10e9, 100e9),
+#     "Q4_Enterprise": (100e9, float("inf")),
+# }
 
-REVENUE_TIER_RELATIVITIES = {
-    "Q1_Small": 0.346,
-    "Q2_Medium": 0.578,
-    "Q3_Large": 1.024,
-    "Q4_Enterprise": 2.050,
-}
+# REVENUE_TIER_RELATIVITIES = {
+#     "Q1_Small": 0.346,
+#     "Q2_Medium": 0.578,
+#     "Q3_Large": 1.024,
+#     "Q4_Enterprise": 2.050,
+# }
 
 INDUSTRY_CODES = {
     "21": "Mining",
@@ -358,7 +358,7 @@ def predict_frequency(
         + FREQ_COEFFICIENTS["log_revenue"] * log_revenue
         + FREQ_COEFFICIENTS["log_employees"] * log_employees
         + FREQ_COEFFICIENTS["is_public"] * is_public_numeric
-        + FREQ_COEFFICIENTS["revenue_tier"] * size_category
+        # + FREQ_COEFFICIENTS["revenue_tier"] * size_category
     )
 
     predicted_frequency = np.exp(log_lambda)
@@ -404,11 +404,11 @@ def predict_severity(
 def get_industry_relativity(industry_code: str) -> float:
     return INDUSTRY_RELATIVITIES.get(industry_code, 1.0)
 
-def get_revenue_tier_relativity(company_revenue: float) -> tuple:
-    for tier, (min_rev, max_rev) in REVENUE_TIER_RANGES.items():
-        if min_rev <= company_revenue < max_rev:
-            return tier, REVENUE_TIER_RELATIVITIES[tier]
-    return "Unknown", 1.0
+# def get_revenue_tier_relativity(company_revenue: float) -> tuple:
+#     for tier, (min_rev, max_rev) in REVENUE_TIER_RANGES.items():
+#         if min_rev <= company_revenue < max_rev:
+#             return tier, REVENUE_TIER_RELATIVITIES[tier]
+#     return "Unknown", 1.0
 
 def calculate_pure_premium(frequency: float, severity: float) -> dict:
     pure_premium = frequency * severity
@@ -431,7 +431,7 @@ def calculate_pure_premium(frequency: float, severity: float) -> dict:
 
 def generate_coverage_tiers(final_premium: float) -> dict:
     tier1_premium = final_premium * 1.00
-    tier2_premium = final_premium * 1.25
+    tier2_premium = final_premium * 0.6
     combined_premium = tier1_premium + tier2_premium
 
     return {
@@ -467,7 +467,7 @@ def premium_quotation_tool(
         severity = sev_result["expected_severity"]
 
         industry_rel = get_industry_relativity(industry_code)
-        revenue_tier, revenue_rel = get_revenue_tier_relativity(company_revenue_usd)
+        # revenue_tier, revenue_rel = get_revenue_tier_relativity(company_revenue_usd)
 
         premium_calc = calculate_pure_premium(frequency, severity)
         base_final_premium = premium_calc["final_premium"]
@@ -492,7 +492,7 @@ def premium_quotation_tool(
             "adjustments": {
                 "base_final_premium": f"${base_final_premium:,.0f}",
                 "industry_adjustment_factor": f"{industry_rel:.3f}x",
-                "revenue_tier_adjustment_factor": f"{revenue_rel:.3f}x",
+                # "revenue_tier_adjustment_factor": f"{revenue_rel:.3f}x",
                 "final_adjusted_premium": f"${adjusted_premium:,.0f}",
             },
             "loading_breakdown_58percent": {
@@ -540,7 +540,7 @@ def explain_coverage_tiers(tier: int) -> str:
             "best_for": "All companies - baseline protection",
         },
         2: {
-            "name": "Tier 2: Secondary Coverage (125% of base premium)",
+            "name": "Tier 2: Secondary Coverage (60% of base premium)",
             "attack_vectors": ["DDoS", "Malware", "Trojans", "Backdoors", "APTs"],
             "includes": [
                 "Advanced threat monitoring",
@@ -558,7 +558,7 @@ def explain_coverage_tiers(tier: int) -> str:
 
 def compare_coverage_costs(tier1_premium: float) -> str:
     """Compare costs of different coverage options"""
-    tier2_premium = tier1_premium * 1.25
+    tier2_premium = tier1_premium * 0.6
     combined_premium = tier1_premium + tier2_premium
 
     comparison = {
@@ -628,7 +628,7 @@ MODELS USED:
 
 COVERAGE TIERS:
 - Tier 1 (Primary): Ransomware, Data Breaches, Supply Chain - 100% of base premium
-- Tier 2 (Secondary): DDoS, Malware, Trojans, Backdoors, APTs - 125% of base premium
+- Tier 2 (Secondary): DDoS, Malware, Trojans, Backdoors, APTs - 60% of base premium
 
 WORKFLOW:
 1. Gather company information (name, revenue, employees, industry, public status)
@@ -676,7 +676,7 @@ print(f"\n  PREMIUM ENGINE:")
 print(f"    Loading Factors: {TOTAL_LOADING * 100:.1f}%")
 print(f"    Industries: {len(INDUSTRY_RELATIVITIES)}")
 print(f"    Revenue Tiers: {len(REVENUE_TIER_RELATIVITIES)}")
-print(f"    Coverage Tiers: Tier 1 (100%) + Tier 2 (125%)")
+print(f"    Coverage Tiers: Tier 1 (100%) + Tier 2 (60%)")
 
 print(f"\n🚀 AGENT READY FOR QUERIES")
 print(f"\nUsage:")
@@ -706,9 +706,9 @@ test_tiers = generate_coverage_tiers(test_premium["final_premium"])
 
 # Industry and size adjustments
 industry_rel = get_industry_relativity("51")
-revenue_tier, revenue_rel = get_revenue_tier_relativity(150e9)
+# revenue_tier, revenue_rel = get_revenue_tier_relativity(150e9)
 
-adjusted_premium = test_premium["final_premium"] * industry_rel * revenue_rel
+adjusted_premium = test_premium["final_premium"] * industry_rel # * revenue_rel
 final_tiers = generate_coverage_tiers(adjusted_premium)
 
 print(f"\nPredictions using EXTRACTED Coefficients:")
@@ -720,7 +720,7 @@ print(f"  • With Loading (58%): ${test_premium['final_premium']:,.0f}")
 
 print(f"\nAdjustments:")
 print(f"  • Industry (Tech 51): {industry_rel:.3f}x")
-print(f"  • Revenue Tier ({revenue_tier}): {revenue_rel:.3f}x")
+# print(f"  • Revenue Tier ({revenue_tier}): {revenue_rel:.3f}x")
 print(f"  • Adjusted Premium: ${adjusted_premium:,.0f}")
 
 print(f"\nCoverage Tiers:")
