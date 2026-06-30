@@ -840,7 +840,7 @@ if "insurance_agent_messages" not in st.session_state:
     st.session_state.insurance_agent_messages = [
         {
             "role": "assistant",
-            "content": "Welcome to the Cyber Insurance Pricing Engine. Please provide your company details to generate a customized quote. (All premiums are protected by a maximum 5% of revenue guardrail.)"
+            "content": "Welcome to the Cyber Insurance Pricing Engine. Please provide your company details to generate a customized quote."
         }
     ]
  
