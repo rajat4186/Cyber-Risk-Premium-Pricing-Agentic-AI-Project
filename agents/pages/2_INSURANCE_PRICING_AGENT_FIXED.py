@@ -421,7 +421,13 @@ def calculate_pure_premium(frequency: float, severity: float) -> dict:
     }
     total_loading = sum(loading_dict.values())
     final_premium = pure_premium + total_loading
-
+    
+    # Defining the upper bound guardrail (max 5% of company revenue)
+    max_allowable_premium = company_revenue * 0.05 
+    is_capped = final_premium > max_allowable_premium
+    if is_capped:
+        final_premium = max_allowable_premium
+        
     return {
         "pure_premium": round(pure_premium, 0),
         "loading_components": {k: round(v, 0) for k, v in loading_dict.items()},
