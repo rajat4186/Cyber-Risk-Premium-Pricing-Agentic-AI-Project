@@ -29,7 +29,7 @@ data_validation_agent = st.Page(
 )
 
 insurance_pricing_agent = st.Page(
-    page="pages/2_INSURANCE_PRICING_AGENT_FIXED.py", 
+    page="pages/2_INSURANCE_PRICING_AGENT_GUARDRAIL.py", 
     title="Insurance Pricing Agent", 
     icon="📊"
 )
