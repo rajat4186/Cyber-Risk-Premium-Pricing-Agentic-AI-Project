@@ -479,8 +479,9 @@ def premium_quotation_tool(
 
         industry_rel = get_industry_relativity(industry_code)
         # revenue_tier, revenue_rel = get_revenue_tier_relativity(company_revenue_usd)
+        revenue_val = merged.get("revenue")
 
-        premium_calc = calculate_pure_premium(frequency, severity)
+        premium_calc = calculate_pure_premium(frequency, severity, revenue_val)
         base_final_premium = premium_calc["final_premium"]
         adjusted_premium = base_final_premium * industry_rel # * revenue_rel
         coverage_tiers = generate_coverage_tiers(adjusted_premium)
