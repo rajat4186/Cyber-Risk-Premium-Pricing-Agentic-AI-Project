@@ -421,6 +421,7 @@ def calculate_pure_premium(frequency: float, severity: float, company_revenue: f
     }
     total_loading = sum(loading_dict.values())
     final_premium = pure_premium + total_loading
+    company_revenue = merged["company_revenue_usd"]
     
     # Defining the upper bound guardrail (max 5% of company revenue)
     max_allowable_premium = company_revenue * 0.05 
@@ -479,9 +480,8 @@ def premium_quotation_tool(
 
         industry_rel = get_industry_relativity(industry_code)
         # revenue_tier, revenue_rel = get_revenue_tier_relativity(company_revenue_usd)
-        revenue_val = merged.get("revenue")
 
-        premium_calc = calculate_pure_premium(frequency, severity, revenue_val)
+        premium_calc = calculate_pure_premium(frequency, severity, company_revenue_usd)
         base_final_premium = premium_calc["final_premium"]
         adjusted_premium = base_final_premium * industry_rel # * revenue_rel
         coverage_tiers = generate_coverage_tiers(adjusted_premium)
