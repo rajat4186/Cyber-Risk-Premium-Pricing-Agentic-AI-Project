@@ -712,7 +712,7 @@ print(f"  • Data at risk: 100 million records")
 test_freq = predict_frequency(150e9, 250000, True)
 test_sev = predict_severity(150e9, 250000, True, 100e6)
 test_premium = calculate_pure_premium(
-    test_freq["predicted_frequency"], test_sev["expected_severity"]
+    test_freq["predicted_frequency"], test_sev["expected_severity"], company_revenue
 )
 test_tiers = generate_coverage_tiers(test_premium["final_premium"])
 
