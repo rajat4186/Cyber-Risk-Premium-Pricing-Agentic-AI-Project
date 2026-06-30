@@ -410,7 +410,7 @@ def get_industry_relativity(industry_code: str) -> float:
 #             return tier, REVENUE_TIER_RELATIVITIES[tier]
 #     return "Unknown", 1.0
 
-def calculate_pure_premium(frequency: float, severity: float, company_revenue: float) -> dict:
+def calculate_pure_premium(frequency: float, severity: float) -> dict:
     pure_premium = frequency * severity
     loading_dict = {
         "acquisition": pure_premium * LOADING_FACTORS["acquisition"],
@@ -421,18 +421,18 @@ def calculate_pure_premium(frequency: float, severity: float, company_revenue: f
     }
     total_loading = sum(loading_dict.values())
     final_premium = pure_premium + total_loading
-    company_revenue = merged["company_revenue_usd"]
+    # company_revenue = merged["company_revenue_usd"]
     
     # Defining the upper bound guardrail (max 5% of company revenue)
-    max_allowable_premium = company_revenue * 0.05 
-    is_capped = final_premium > max_allowable_premium
-    if is_capped:
-        # final_premium = max_allowable_premium
-        reduction_factor = max_allowable_premium / final_premium
-        pure_premium *= reduction_factor
-        total_loading *= reduction_factor
-        final_premium = max_allowable_premium
-        loading_dict = {k: v * reduction_factor for k, v in loading_dict.items()}
+    # max_allowable_premium = company_revenue * 0.05 
+    # is_capped = final_premium > max_allowable_premium
+    # if is_capped:
+    #     # final_premium = max_allowable_premium
+    #     reduction_factor = max_allowable_premium / final_premium
+    #     pure_premium *= reduction_factor
+    #     total_loading *= reduction_factor
+    #     final_premium = max_allowable_premium
+    #     loading_dict = {k: v * reduction_factor for k, v in loading_dict.items()}
         
     return {
         "pure_premium": round(pure_premium, 0),
@@ -711,9 +711,9 @@ print(f"  • Data at risk: 100 million records")
 # Predictions using EXTRACTED coefficients
 test_freq = predict_frequency(150e9, 250000, True)
 test_sev = predict_severity(150e9, 250000, True, 100e6)
-test_company_revenue  = 150e8
+# test_company_revenue  = 150e8
 test_premium = calculate_pure_premium(
-    test_freq["predicted_frequency"], test_sev["expected_severity"], test_company_revenue
+    test_freq["predicted_frequency"], test_sev["expected_severity"]
 )
 test_tiers = generate_coverage_tiers(test_premium["final_premium"])
 
