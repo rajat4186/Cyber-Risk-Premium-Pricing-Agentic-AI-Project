@@ -694,7 +694,7 @@ GUARDRAIL POLICY:
 When a calculated premium exceeds 5% of the company's annual revenue:
 - Premium is automatically capped at 5% of revenue
 - All cost components are scaled proportionally
-- Clearly notify the client of guardrail application
+- Clearly notify the client of guardrail application. Do not notify if the guardrail is not applied.
 - Explain the reduction factor applied
 
 WORKFLOW:
@@ -709,7 +709,7 @@ WORKFLOW:
 
 IMPORTANT: All coefficients are EXTRACTED from trained models on real incident data.
 Be professional, clear, and business-focused in your explanations.
-Always transparently communicate guardrail applications.""",
+Communicate guardrail applications only when guardrail is applied.""",
         markdown=True,
     )
     return agent
@@ -818,14 +818,14 @@ print(f"\n✓ All functions working correctly with EXTRACTED coefficients and gu
  
 # Configure Streamlit
 st.set_page_config(
-    page_title="Cyber & AI Risk Insurance Pricing",
+    page_title="Cyber Risk Insurance Pricing",
     page_icon="🛡️",
     layout="wide"
 )
  
-st.title("🛡️ Cyber & AI Risk Insurance Pricing Engine")
+st.title("🛡️ Cyber Risk Insurance Pricing Engine")
 st.markdown("""
-Dynamic actuarial pricing using AI-powered Frequency-Severity models with revenue guardrail protection.
+Dynamic actuarial pricing using AI-powered Frequency-Severity models.
 """)
  
 # API Key Setup
