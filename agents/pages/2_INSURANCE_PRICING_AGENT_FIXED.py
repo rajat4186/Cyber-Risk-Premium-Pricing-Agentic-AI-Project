@@ -410,7 +410,7 @@ def get_industry_relativity(industry_code: str) -> float:
 #             return tier, REVENUE_TIER_RELATIVITIES[tier]
 #     return "Unknown", 1.0
 
-def calculate_pure_premium(frequency: float, severity: float) -> dict:
+def calculate_pure_premium(frequency: float, severity: float, company_revenue: float) -> dict:
     pure_premium = frequency * severity
     loading_dict = {
         "acquisition": pure_premium * LOADING_FACTORS["acquisition"],
@@ -426,7 +426,12 @@ def calculate_pure_premium(frequency: float, severity: float) -> dict:
     max_allowable_premium = company_revenue * 0.05 
     is_capped = final_premium > max_allowable_premium
     if is_capped:
+        # final_premium = max_allowable_premium
+        reduction_factor = max_allowable_premium / final_premium
+        pure_premium *= reduction_factor
+        total_loading *= reduction_factor
         final_premium = max_allowable_premium
+        loading_dict = {k: v * reduction_factor for k, v in loading_dict.items()}
         
     return {
         "pure_premium": round(pure_premium, 0),
