@@ -156,7 +156,7 @@ def calculate_gross_premium(company_revenue: float, industry_code: str) -> Dict:
         raise ValueError(f'Unknown industry: {industry_code}')
 
     relativity = INDUSTRY_DATA[industry_code]['relativity']
-    base_rate = (ACTUARIAL.mean_final_premium / 2500000000) * relativity
+    base_rate = (ACTUARIAL.mean_final_premium / 5000000000) * relativity
 
     pure_premium_rate = base_rate / (1 + ACTUARIAL.total_loading_pct)
     pure_premium_usd = company_revenue * pure_premium_rate
