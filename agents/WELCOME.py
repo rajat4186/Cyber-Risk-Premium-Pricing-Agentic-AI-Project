@@ -5,7 +5,7 @@ import os
 # PAGE CONFIGURATION & THEME
 # ==============================================================================
 st.set_page_config(
-    page_title="Cyber & AI Risk Actuarial Suite",
+    page_title="Cyber Risk Actuarial Suite",
     page_icon="🛡️",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -68,7 +68,7 @@ else:
     # ==============================================================================
     
     # Header Banner Section
-    st.title("🛡️ Cyber & AI Risk Premium Pricing Framework")
+    st.title("🛡️ Cyber Risk Premium Pricing Suite")
     st.subheader("An Agentic AI End-to-End Actuarial Ingestion & Quotation Architecture")
     st.markdown("---")
 
