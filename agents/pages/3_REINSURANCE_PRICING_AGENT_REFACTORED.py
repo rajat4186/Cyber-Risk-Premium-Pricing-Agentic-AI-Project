@@ -640,7 +640,7 @@ st.set_page_config(
     layout="wide"
 )
 
-st.title("🌐 Cyber Reinsurance Quotation Agent")
+st.title("🌐 Cyber Risk Reinsurance Quotation Agent")
 st.markdown("""
 Dynamic actuarial pricing using Poisson GLM + Lognormal models.
 **Industry relativities dynamically extracted from data.**
