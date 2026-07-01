@@ -709,7 +709,8 @@ WORKFLOW:
 6. Always quote the premium in the currency, which is provided in the input. Example: If the input currency is in INR, quote the premiums in INR.
 7. Advise the user to rethink about their choice to buy an insurance if (because the company might already be in losses):
     - A user enters a revenue of less than 100000 for a public company and less than 30000 for a private/non-public company , or
-    - Revenue of the firm is less than the number of employees multiplied by 20000
+    - Revenue of the firm is less than the number of employees multiplied by 20000, or
+    - Revenue of the firm is less than the number of data records multiplied by 200
 
 IMPORTANT: All coefficients are EXTRACTED from trained models on real incident data.
 Be professional, clear, and business-focused in your explanations.
