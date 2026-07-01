@@ -737,7 +737,6 @@ GUIDELINES:
     - Revenue < data records × $200
 - If numeric inputs (revenue, employees, data records) are non-positive, inform user and do not generate quote
 - If recommending Hybrid, provide the quote breakdown with brief details in tabular form also
-- Always explain the terms used for reinsurance types relevant to the quote
 - Recommend Hybrid (Proportional + XOL) for enterprise clients
 - Industry relativities are dynamically extracted from 750-company dataset
 - Be professional and data-driven''',
