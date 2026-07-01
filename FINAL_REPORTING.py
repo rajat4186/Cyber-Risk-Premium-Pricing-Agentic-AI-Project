@@ -707,6 +707,7 @@ try:
         tools=[generate_pdf_report],
         description="Consolidates multi-agent model inputs and generates structured executive reports with ReportLab artifacts.",
         instructions="""You are an Executive Cyber Underwriting Reporting Agent.
+         
 
 ROLE:
 - Review structured actuarial underwriting data
@@ -726,7 +727,14 @@ OUTPUT:
 - Professional narrative with risk classification
 - Clear premium and reinsurance cost breakdowns
 - Actionable underwriting recommendations
-- Clearly flag if the revenue guardrail was applied to the premium""",
+- Clearly flag if the revenue guardrail was applied to the premium, 
+Always quote the premium in the currency, which is provided in the input. Example: If the input currency is in INR, quote the premiums in INR.
+Advise the user to rethink about their choice to buy an insurance if (because the company might already be in losses):
+              - A user enters a revenue of less than 100000 for a public company and less than 30000 for a private/non-public company , or
+              - Revenue of the firm is less than the number of employees multiplied by 20000, or
+              - Revenue of the firm is less than the number of data records multiplied by 200
+If any of the numeric inputs (revenue, employees, data records) entered is a non-positive number, then inform the user about the mistake and do not generate the quote or PDF or provide a risk warning.""",
+       
         markdown=True,
     )
     
@@ -737,6 +745,8 @@ except Exception as e:
     print(f"⚠️  Warning: Agent creation error: {e}")
     reporting_agent = None
     AGENT_READY = False
+
+
 
 # ============================================================================
 # PHASE 6: STREAMLIT UI DEPLOYMENT
