@@ -122,26 +122,26 @@ print(f"  Mean final premium: ${ACTUARIAL.mean_final_premium:.1f}M")
 # ============================================================================
 
 INDUSTRY_DATA = {
-    '55': {'name': 'Management of Companies', 'relativity': 1.417, 'count': 2, 'mean_premium': 59.2},
-    '44-45': {'name': 'Retail Trade', 'relativity': 1.264, 'count': 65, 'mean_premium': 52.8},
-    '51': {'name': 'Information & Technology', 'relativity': 1.231, 'count': 102, 'mean_premium': 51.4},
-    '92': {'name': 'Public Administration', 'relativity': 1.221, 'count': 52, 'mean_premium': 51.0},
-    '52': {'name': 'Finance & Insurance', 'relativity': 1.181, 'count': 106, 'mean_premium': 49.3},
-    '31-33': {'name': 'Manufacturing', 'relativity': 1.023, 'count': 67, 'mean_premium': 42.7},
-    '21': {'name': 'Mining, Quarrying, Oil & Gas', 'relativity': 0.955, 'count': 21, 'mean_premium': 39.9},
-    '62': {'name': 'Health Care & Social Assistance', 'relativity': 0.914, 'count': 117, 'mean_premium': 38.1},
-    '22': {'name': 'Utilities', 'relativity': 0.885, 'count': 38, 'mean_premium': 36.9},
-    '42': {'name': 'Wholesale Trade', 'relativity': 0.804, 'count': 10, 'mean_premium': 33.6},
-    '48-49': {'name': 'Transportation & Warehousing', 'relativity': 0.800, 'count': 23, 'mean_premium': 33.4},
-    '11': {'name': 'Agriculture, Forestry & Fishing', 'relativity': 0.702, 'count': 4, 'mean_premium': 29.3},
-    '72': {'name': 'Accommodation & Food Services', 'relativity': 0.690, 'count': 16, 'mean_premium': 28.8},
-    '61': {'name': 'Educational Services', 'relativity': 0.663, 'count': 37, 'mean_premium': 27.7},
-    '53': {'name': 'Real Estate & Rental', 'relativity': 0.663, 'count': 8, 'mean_premium': 27.7},
-    '54': {'name': 'Professional Services', 'relativity': 0.650, 'count': 36, 'mean_premium': 27.1},
-    '56': {'name': 'Administrative & Support', 'relativity': 0.620, 'count': 16, 'mean_premium': 25.9},
-    '81': {'name': 'Other Services', 'relativity': 0.617, 'count': 3, 'mean_premium': 25.8},
-    '71': {'name': 'Arts, Entertainment & Recreation', 'relativity': 0.615, 'count': 14, 'mean_premium': 25.7},
-    '23': {'name': 'Construction', 'relativity': 0.598, 'count': 13, 'mean_premium': 25.0},
+    '55': {'name': 'Management of Companies', 'relativity': 1.417, 'count': 2, 'mean_premium': 59.2, 'company_revenue' = 13987682432},
+    '44-45': {'name': 'Retail Trade', 'relativity': 1.264, 'count': 65, 'mean_premium': 52.8, 'company_revenue' = 21503111381},
+    '51': {'name': 'Information & Technology', 'relativity': 1.231, 'count': 102, 'mean_premium': 51.4, 'company_revenue' = 17350907767},
+    '92': {'name': 'Public Administration', 'relativity': 1.221, 'count': 52, 'mean_premium': 51.0, 'company_revenue' = 11189515458},
+    '52': {'name': 'Finance & Insurance', 'relativity': 1.181, 'count': 106, 'mean_premium': 49.3, 'company_revenue' = 14032011064},
+    '31-33': {'name': 'Manufacturing', 'relativity': 1.023, 'count': 67, 'mean_premium': 42.7, 'company_revenue' = 8440542382},
+    '21': {'name': 'Mining, Quarrying, Oil & Gas', 'relativity': 0.955, 'count': 21, 'mean_premium': 39.9, 'company_revenue' = 5829225200},
+    '62': {'name': 'Health Care & Social Assistance', 'relativity': 0.914, 'count': 117, 'mean_premium': 38.1, 'company_revenue' = 7119510079},
+    '22': {'name': 'Utilities', 'relativity': 0.885, 'count': 38, 'mean_premium': 36.9, 'company_revenue' = 3798766690},
+    '42': {'name': 'Wholesale Trade', 'relativity': 0.804, 'count': 10, 'mean_premium': 33.6, 'company_revenue' = 2126170356},
+    '48-49': {'name': 'Transportation & Warehousing', 'relativity': 0.800, 'count': 23, 'mean_premium': 33.4, 'company_revenue' = 3593667169},
+    '11': {'name': 'Agriculture, Forestry & Fishing', 'relativity': 0.702, 'count': 4, 'mean_premium': 29.3, 'company_revenue' = 1207064656},
+    '72': {'name': 'Accommodation & Food Services', 'relativity': 0.690, 'count': 16, 'mean_premium': 28.8, 'company_revenue' = 2507153336},
+    '61': {'name': 'Educational Services', 'relativity': 0.663, 'count': 37, 'mean_premium': 27.7, 'company_revenue' = 1636482680},
+    '53': {'name': 'Real Estate & Rental', 'relativity': 0.663, 'count': 8, 'mean_premium': 27.7, 'company_revenue' = 2438306979},
+    '54': {'name': 'Professional Services', 'relativity': 0.650, 'count': 36, 'mean_premium': 27.1, 'company_revenue' = 1747029445},
+    '56': {'name': 'Administrative & Support', 'relativity': 0.620, 'count': 16, 'mean_premium': 25.9, 'company_revenue' = 2104764567},
+    '81': {'name': 'Other Services', 'relativity': 0.617, 'count': 3, 'mean_premium': 25.8, 'company_revenue' = 1325966102},
+    '71': {'name': 'Arts, Entertainment & Recreation', 'relativity': 0.615, 'count': 14, 'mean_premium': 25.7, 'company_revenue' = 1372969954},
+    '23': {'name': 'Construction', 'relativity': 0.598, 'count': 13, 'mean_premium': 25.0, 'company_revenue' = 2422030008},
 }
 
 print(f"✓ Supported industries: {len(INDUSTRY_DATA)}")
@@ -155,8 +155,10 @@ def calculate_gross_premium(company_revenue: float, industry_code: str) -> Dict:
     if industry_code not in INDUSTRY_DATA:
         raise ValueError(f'Unknown industry: {industry_code}')
 
+    premium = INDUSTRY_DATA['mean_premium']*1000000
+    revenue = INDUSTRY_DATA['company_revenue']
     relativity = INDUSTRY_DATA[industry_code]['relativity']
-    base_rate = (ACTUARIAL.mean_final_premium / 1000000000) * relativity
+    base_rate =  (premium/revenue)* relativity
 
     pure_premium_rate = base_rate / (1 + ACTUARIAL.total_loading_pct)
     pure_premium_usd = company_revenue * pure_premium_rate
