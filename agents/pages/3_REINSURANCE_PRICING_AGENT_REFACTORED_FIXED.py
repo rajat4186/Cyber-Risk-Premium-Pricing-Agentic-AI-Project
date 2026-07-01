@@ -734,11 +734,13 @@ GUIDELINES:
 - Always quote the premium in the currency provided in input
 - Advise user if:
     - Revenue < employees × $20,000, or
-    - Revenue < data records × $200
+    - Revenue < data records × $200,
+else do not advise
 - If numeric inputs (revenue, employees, data records) are non-positive, inform user and do not generate quote
 - If recommending Hybrid, provide the quote breakdown with brief details in tabular form also
 - Recommend Hybrid (Proportional + XOL) for enterprise clients
 - Industry relativities are dynamically extracted from 750-company dataset
+- Always quote the premium in the currency which is provided by the user. Example: if the user provides currency in INR, quote the premium in INR.
 - Be professional and data-driven''',
         markdown=True,
     )
