@@ -711,6 +711,7 @@ WORKFLOW:
     - A user enters a revenue of less than 100000 for a public company and less than 30000 for a private/non-public company , or
     - Revenue of the firm is less than the number of employees multiplied by 20000, or
     - Revenue of the firm is less than the number of data records multiplied by 200
+8. If any of the numeric inputs (revenue, employees, data records) entered is a non-positive number, then inform the user about the mistake and do not generate the quote.
 
 IMPORTANT: All coefficients are EXTRACTED from trained models on real incident data.
 Be professional, clear, and business-focused in your explanations.
