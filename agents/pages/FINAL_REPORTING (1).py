@@ -67,14 +67,15 @@ def train_models():
         company_freq = (
             incidents.groupby("company_name")
             .agg({"incident_id": "count", "company_revenue_usd": "first",
-                  "employee_count": "first", "is_public_company": "first"})
+                  "employee_count": "first", "is_public_company": "first", "data_compromised_records":"first"})
             .reset_index()
             .rename(columns={"incident_id": "incident_count"})
             .dropna()
         )
-        Xf = company_freq[["company_revenue_usd", "employee_count", "is_public_company"]].copy()
+        Xf = company_freq[["company_revenue_usd", "employee_count", "is_public_company","data_compromised_records"]].copy()
         Xf["log_revenue"]   = np.log1p(Xf["company_revenue_usd"])
         Xf["log_employees"] = np.log1p(Xf["employee_count"])
+        Xf["log_records"] = np.log1p(Xf["data_compromised_records"])
         Xf["revenue_tier"]  = pd.cut(Xf["company_revenue_usd"],
                                      bins=[0, 1e9, 10e9, 100e9, np.inf],
                                      labels=[0, 1, 2, 3]).astype(int)
@@ -91,7 +92,7 @@ def train_models():
             "intercept":    float(freq_model.intercept_),
             "log_revenue":  float(freq_model.coef_[0]),
             "log_employees":float(freq_model.coef_[1]),
-            "is_public":    float(freq_model.coef_[2]),
+            "is_public":    float(freq_model.coef_[2])
             # "revenue_tier": float(freq_model.coef_[3]),  # dropped - aligned with GUARDRAIL
         }
 
