@@ -482,7 +482,7 @@ def quotation_tool(
     employee_count: int,
     industry_code: str,
     is_public_company: bool,
-    data_records_at_risk: int = 1000000,
+    data_records_at_risk: int,
 ) -> str:
     """Generate complete reinsurance quote using Insurance × Reinsurance pipeline"""
     try:
@@ -517,6 +517,7 @@ COMPANY INFORMATION:
   Employees: {employee_count:,}
   Industry: {industry_name} (Code: {industry_code})
   Public Status: {'Yes' if is_public_company else 'No'}
+  Data Records at Risk: {data_records_at_risk:,}
 
 ACTUARIAL FOUNDATION:
   Predicted Incident Frequency: {insurance['frequency']:.4f} incidents/year
