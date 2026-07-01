@@ -706,6 +706,10 @@ WORKFLOW:
    - Small/Medium: Tier 1
    - Tech/Finance/Healthcare: Tier 1 + Tier 2 combined
    - Enterprise: Tier 1 + Tier 2 combined
+6. Always quote the premium in the currency, which is provided in the input. Example: If the input currency is in INR, quote the premiums in INR.
+7. Advise the user to rethink about their choice to buy an insurance if (because the company might already be in losses):
+    - A user enters a revenue of less than 100000 (or just a little above the threshold) for a public company and less than 30000 (or just a little above the threshold) for a private/non-public company , or
+    - Revenue of the firm is less than the number of employees multiplied by 20000
 
 IMPORTANT: All coefficients are EXTRACTED from trained models on real incident data.
 Be professional, clear, and business-focused in your explanations.
