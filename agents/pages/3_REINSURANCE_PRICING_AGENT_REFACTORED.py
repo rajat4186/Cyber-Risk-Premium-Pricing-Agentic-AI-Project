@@ -611,6 +611,11 @@ SUPPORTED INDUSTRIES (NAICS Codes):
 GUIDELINES:
 - Minimum revenue: $100 million
 - Always use quotation_tool for quotes
+- Always quote the premium in the currency, which is provided in the input. Example: If the input currency is in INR, quote the premiums in INR.
+- Advise the user to rethink about the input they have given (because the company getting insured might be risky for the insurer):
+    - Revenue of the firm is less than the number of employees multiplied by 20000, or
+    - Revenue of the firm is less than the number of data records multiplied by 200
+- If any of the numeric inputs (revenue, employees, data records) entered is a non-positive number, then inform the user about the mistake and do not generate the quote or provide a risk warning.
 - Recommend Hybrid (Proportional + XOL) for enterprise clients
 - Industry relativities are dynamically extracted from 750-company dataset
 - Be professional and data-driven''',
