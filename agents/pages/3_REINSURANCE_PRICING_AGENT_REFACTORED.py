@@ -651,7 +651,7 @@ if "messages_reinsurance" not in st.session_state:
     st.session_state.messages_reinsurance = [
         {
             "role": "assistant",
-            "content": "Hello! I am your Reinsurance Quotation Agent. I use the same Frequency×Severity actuarial pipeline as the Insurance Pricing Agent, with dynamically calculated industry relativities. Ask me to generate a quote!
+            "content": "Hello! I am your Reinsurance Quotation Agent. I use the same Frequency×Severity actuarial pipeline as the Insurance Pricing Agent, with dynamically calculated industry relativities. Ask me to generate a quote!"
     ]
 
 # Display Chat History
