@@ -727,13 +727,13 @@ OUTPUT:
 - Professional narrative with risk classification
 - Clear premium and reinsurance cost breakdowns
 - Actionable underwriting recommendations
-- Clearly flag if the revenue guardrail was applied to the premium, 
-Always quote the premium in the currency, which is provided in the input. Example: If the input currency is in INR, quote the premiums in INR.
-Advise the user to rethink about their choice to buy an insurance if (because the company might already be in losses):
+- Clearly flag if the revenue guardrail was applied to the premium 
+- Always quote the premium in the currency, which is provided in the input. Example: If the input currency is in INR, quote the premiums in INR.
+- Advise the user to rethink about their choice to buy an insurance if (because the company might already be in losses):
               - A user enters a revenue of less than 100000 for a public company and less than 30000 for a private/non-public company , or
               - Revenue of the firm is less than the number of employees multiplied by 20000, or
               - Revenue of the firm is less than the number of data records multiplied by 200
-If any of the numeric inputs (revenue, employees, data records) entered is a non-positive number, then inform the user about the mistake and do not generate the quote or PDF or provide a risk warning.""",
+- If any of the numeric inputs (revenue, employees, data records) entered is a non-positive number, then inform the user about the mistake and do not generate the quote or PDF or provide a risk warning.""",
        
         markdown=True,
     )
