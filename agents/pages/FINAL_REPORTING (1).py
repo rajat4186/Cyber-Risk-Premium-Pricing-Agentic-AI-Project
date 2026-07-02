@@ -93,7 +93,7 @@ def train_models():
             "log_revenue":  float(freq_model.coef_[0]),
             "log_employees":float(freq_model.coef_[1]),
             "is_public":    float(freq_model.coef_[2]),
-            "log_revenue":  float(freq_model.coef_[3])
+            "log_records":  float(freq_model.coef_[3])
             # "revenue_tier": float(freq_model.coef_[3]),  # dropped - aligned with GUARDRAIL
         }
 
