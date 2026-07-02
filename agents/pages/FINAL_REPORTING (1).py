@@ -781,6 +781,7 @@ st.session_state["company_name_input"] = company_name
 revenue = st.sidebar.number_input("Annual Gross Revenue ($)", min_value=100000.0, value=250000000.0, step=1000000.0)
 employees = st.sidebar.number_input("Total Employee Count", min_value=1, value=1250, step=10)
 is_public = st.sidebar.checkbox("Is Publicly Traded Enterprise?", value=False)
+data_records = st.sidebar.number_input("Number of Data Records Exposed", min_value=1, value=50000, step=100)
 
 ind_options = {k: f"{v['name']} (NAICS {k})" for k, v in INDUSTRY_DATA.items()}
 selected_industry = st.sidebar.selectbox("Industry Sector Classification", options=list(ind_options.keys()), format_func=lambda x: ind_options[x])
