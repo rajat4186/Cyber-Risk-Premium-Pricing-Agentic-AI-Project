@@ -605,7 +605,7 @@ def generate_pdf_report(quotation_data_json: str, output_filename: str = "Cyber_
     story = []
     
     # Header Section
-    story.append(Paragraph("CYBER & AI RISK INSURANCE REPORT", title_style))
+    story.append(Paragraph("CYBER RISK INSURANCE REPORT", title_style))
     story.append(Paragraph(f"Generated on: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} | Confidential Actuarial Portfolio", subtitle_style))
     story.append(Spacer(1, 8))
     
@@ -761,7 +761,7 @@ except Exception as e:
 # ============================================================================
 
 st.set_page_config(page_title="Cyber Insurance Underwriting Pipeline", layout="wide")
-st.title("🛡️ Cyber & AI Risk Underwriting & Reporting System")
+st.title("🛡️ Cyber Risk Underwriting & Reporting System")
 st.write("End-to-End Pricing Pipeline powered by Statistical Coefficients & Agno Agent Orchestration.")
 
 # Initialize session state with unique keys (avoid cross-page contamination)
