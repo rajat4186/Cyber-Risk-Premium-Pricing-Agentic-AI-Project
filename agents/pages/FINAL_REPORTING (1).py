@@ -790,7 +790,7 @@ trigger_pricing = st.sidebar.button("⚙️ Compute Underwriting Metrics", use_c
 
 # Execute pricing logic
 if trigger_pricing or "active_underwriting_data" not in st.session_state:
-    pricing_results = calculate_insurance_quotation(revenue, employees, is_public, selected_industry, data_records_exposed)
+    pricing_results = calculate_insurance_quotation(revenue, employees, is_public, selected_industry, data_records)
     st.session_state["active_underwriting_data"] = pricing_results
 
 active_data = st.session_state.get("active_underwriting_data", {})
