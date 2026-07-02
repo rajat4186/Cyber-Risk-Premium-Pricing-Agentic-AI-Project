@@ -24,11 +24,11 @@ warnings.filterwarnings("ignore")
 # API KEY MANAGEMENT - Three-Path Strategy
 # ============================================================================
 
-if "GOOGLE_API_KEY" not in os.environ:
-    if "GOOGLE_API_KEY" in st.secrets:
-        os.environ["GOOGLE_API_KEY"] = st.secrets["GOOGLE_API_KEY"]
-    elif "Final_Project_Key" in st.secrets:
-        os.environ["GOOGLE_API_KEY"] = st.secrets["Final_Project_Key"]
+# if "GOOGLE_API_KEY" not in os.environ:
+#     if "GOOGLE_API_KEY" in st.secrets:
+#         os.environ["GOOGLE_API_KEY"] = st.secrets["GOOGLE_API_KEY"]
+#     elif "Final_Project_Key" in st.secrets:
+#         os.environ["GOOGLE_API_KEY"] = st.secrets["Final_Project_Key"]
 
 # ============================================================================
 # PHASE 1: DYNAMIC MODEL TRAINING — Poisson GLM + Lognormal Severity
@@ -92,7 +92,8 @@ def train_models():
             "intercept":    float(freq_model.intercept_),
             "log_revenue":  float(freq_model.coef_[0]),
             "log_employees":float(freq_model.coef_[1]),
-            "is_public":    float(freq_model.coef_[2])
+            "is_public":    float(freq_model.coef_[2]),
+            "log_revenue":  float(freq_model.coef_[3])
             # "revenue_tier": float(freq_model.coef_[3]),  # dropped - aligned with GUARDRAIL
         }
 
@@ -332,9 +333,10 @@ def predict_frequency(company_revenue: float, employee_count: int, is_public: bo
     # above purely for the descriptive size label returned below).
     log_lambda = (
         FREQ_COEFFICIENTS["intercept"] +
-        FREQ_COEFFICIENTS["log_revenue"] * log_revenue +
-        FREQ_COEFFICIENTS["log_employees"] * log_employees +
-        FREQ_COEFFICIENTS["is_public"] * is_public_numeric
+        FREQ_COEFFICIENTS["log_revenue"]*log_revenue +
+        FREQ_COEFFICIENTS["log_employees"]*log_employees +
+        FREQ_COEFFICIENTS["is_public"]*is_public_numeric +
+        FREQ_COEFFICIENTS["log_records"]*log_records
     )
     predicted_frequency = np.exp(log_lambda)
     risk_score = min(100.0, max(5.0, (predicted_frequency / 1.1354) * 100))
@@ -351,9 +353,10 @@ def predict_severity(company_revenue: float, employee_count: int, is_public: boo
     is_public_numeric = 1 if is_public else 0
     log_loss = (
         LOGNORM_PARAMS["mu"] + 
-        SEVER_COEFFICIENTS["log_revenue"] * log_revenue + 
-        SEVER_COEFFICIENTS["log_employees"] * log_employees + 
-        SEVER_COEFFICIENTS["is_public"] * is_public_numeric
+        SEVER_COEFFICIENTS["log_revenue"]*log_revenue + 
+        SEVER_COEFFICIENTS["log_employees"]*log_employees + 
+        SEVER_COEFFICIENTS["is_public"]*is_public_numeric +
+        SEVER_COEFFICIENTS["log_records"]*log_records
     )
     expected_loss = np.exp(log_loss)
     q95_loss = np.exp(LOGNORM_PARAMS["mu"] + LOGNORM_PARAMS["sigma"] * 1.6449)
@@ -362,7 +365,7 @@ def predict_severity(company_revenue: float, employee_count: int, is_public: boo
         "q95_loss": round(q95_loss, 0)
     }
 
-def calculate_insurance_quotation(revenue: float, employees: int, is_public: bool, industry_code: str) -> dict:
+def calculate_insurance_quotation(revenue: float, employees: int, is_public: bool, industry_code: str, data_records: int) -> dict:
     """
     Calculate complete insurance quotation with reinsurance allocation.
 
@@ -381,8 +384,8 @@ def calculate_insurance_quotation(revenue: float, employees: int, is_public: boo
          dict keys are unchanged so the narrative builder, PDF report, and
          Streamlit tabs continue to work without modification.
     """
-    freq_metrics = predict_frequency(revenue, employees, is_public)
-    sev_metrics = predict_severity(revenue, employees, is_public)
+    freq_metrics = predict_frequency(revenue, employees, is_public, data_records)
+    sev_metrics = predict_severity(revenue, employees, is_public, data_records)
     
     pure_premium = freq_metrics["predicted_frequency"] * sev_metrics["expected_severity"]
     
@@ -444,6 +447,7 @@ def calculate_insurance_quotation(revenue: float, employees: int, is_public: boo
             "name": st.session_state.get("company_name_input", "Client Corp"),
             "revenue": revenue,
             "employees": employees,
+            "number of records": data_records
             "industry": INDUSTRY_DATA.get(industry_code, {'name': 'General'})['name']
         },
         "risk_metrics": {
@@ -493,6 +497,7 @@ def _build_narrative(data: dict) -> str:
     industry    = company.get("industry", "the sector")
     revenue     = company.get("revenue", 0)
     employees   = company.get("employees", 0)
+    data_records = company.get("data_records",0)
     freq        = risk.get("predicted_frequency", 0)
     severity    = risk.get("expected_severity", 0)
     q95         = risk.get("q95_loss", 0)
