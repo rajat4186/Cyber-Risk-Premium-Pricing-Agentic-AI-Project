@@ -103,10 +103,10 @@ def train_models():
         lognorm   = {"mu": float(log_losses.mean()), "sigma": float(log_losses.std())}
 
         merged = incidents.merge(financial, on="incident_id", how="inner")
-        Xs = merged[["company_revenue_usd", "employee_count", "is_public_company"]].copy()
+        Xs = merged[["company_revenue_usd", "employee_count", "is_public_company", "data_compromised_records"]].copy()
         Xs["log_revenue"]   = np.log1p(Xs["company_revenue_usd"])
         Xs["log_employees"] = np.log1p(Xs["employee_count"])
-        Xs["log_records"]   = np.log1p(1_000_000)
+        Xs["log_records"]   = np.log1p(Xs["data_compromised_records"])
         ys = np.log(merged["total_loss_usd"])
         Xs_model = Xs[["log_revenue", "log_employees", "is_public_company", "log_records"]].fillna(0)
         Xs_tr, _, ys_tr, _ = train_test_split(Xs_model, ys, test_size=0.2, random_state=42)
