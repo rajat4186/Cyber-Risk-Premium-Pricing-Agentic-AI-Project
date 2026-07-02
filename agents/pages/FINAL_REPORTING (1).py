@@ -808,13 +808,13 @@ if active_data:
     with m3:
         st.metric("Aggregate Vulnerability Score", f"{active_data['risk_metrics']['risk_score']}/100")
 
-    if active_data["premium_calculations"].get("guardrail_applied"):
-        st.warning(
-            f"⚠️ Revenue guardrail applied: premium capped at "
-            f"${active_data['premium_calculations']['guardrail_max_premium']:,.0f} "
-            f"({int(MAX_PREMIUM_PCT_OF_REVENUE*100)}% of annual revenue), "
-            f"reduction factor {active_data['premium_calculations']['guardrail_reduction_factor']:.2%}."
-        )
+    # if active_data["premium_calculations"].get("guardrail_applied"):
+    #     st.warning(
+    #         f"⚠️ Revenue guardrail applied: premium capped at "
+    #         f"${active_data['premium_calculations']['guardrail_max_premium']:,.0f} "
+    #         f"({int(MAX_PREMIUM_PCT_OF_REVENUE*100)}% of annual revenue), "
+    #         f"reduction factor {active_data['premium_calculations']['guardrail_reduction_factor']:.2%}."
+    #     )
 
     # Expandable Breakdown Tabs
     t_metrics, t_premium, t_reinsurance = st.tabs(["📊 Actuarial Projections", "💰 Premium Loading Matrix", "🏢 Reinsurance Allocation Layers"])
