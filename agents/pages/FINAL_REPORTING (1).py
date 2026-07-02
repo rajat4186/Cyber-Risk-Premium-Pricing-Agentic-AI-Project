@@ -347,11 +347,12 @@ def predict_frequency(company_revenue: float, employee_count: int, is_public: bo
         "size_category": ["Small", "Medium", "Large", "Enterprise"][size_category]
     }
 
-def predict_severity(company_revenue: float, employee_count: int, is_public: bool) -> dict:
+def predict_severity(company_revenue: float, employee_count: int, is_public: bool, data_records:int) -> dict:
     """Predict severity using Lognormal with extracted coefficients"""
     log_revenue = np.log1p(company_revenue)
     log_employees = np.log1p(employee_count)
     is_public_numeric = 1 if is_public else 0
+    log_records = np.log1p(data_records)
     log_loss = (
         LOGNORM_PARAMS["mu"] + 
         SEVER_COEFFICIENTS["log_revenue"]*log_revenue + 
