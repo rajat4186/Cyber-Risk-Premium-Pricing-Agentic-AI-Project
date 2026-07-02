@@ -447,7 +447,7 @@ def calculate_insurance_quotation(revenue: float, employees: int, is_public: boo
             "name": st.session_state.get("company_name_input", "Client Corp"),
             "revenue": revenue,
             "employees": employees,
-            "number of records": data_records
+            "data_records": data_records
             "industry": INDUSTRY_DATA.get(industry_code, {'name': 'General'})['name']
         },
         "risk_metrics": {
