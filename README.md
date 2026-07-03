@@ -2,7 +2,7 @@
 
 **Guiding the Future of Cyber Insurance Pricing with AI**
 
-An end-to-end, multi-agent agentic AI system for pricing cyber and AI risk across insurance and reinsurance lines, built on actuarial GLM/Lognormal frequency-severity models and orchestrated with Agno + Google Gemini.
+An end-to-end, multi-agent agentic AI system for pricing cyber risk across insurance and reinsurance lines, built on actuarial GLM/Lognormal frequency-severity models and orchestrated with Agno + Google Gemini.
 
 Submitted under the **SSSIA AI Internship Program**
 
