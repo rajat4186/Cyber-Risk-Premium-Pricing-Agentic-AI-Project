@@ -4,7 +4,7 @@
 
 An end-to-end, multi-agent agentic AI system for pricing cyber and AI risk across insurance and reinsurance lines, built on actuarial GLM/Lognormal frequency-severity models and orchestrated with Agno + Google Gemini.
 
-Submitted under the **SSSIA AI Internship Program — "Future of the Profession"** category.
+Submitted under the **SSSIA AI Internship Program**
 
 **Authors:** Rajat Chhabra, Suvitha Nagarajan, Sarah Comfort Samson
 
