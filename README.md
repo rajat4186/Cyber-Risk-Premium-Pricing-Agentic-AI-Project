@@ -1,4 +1,4 @@
-# 🛡️ Cyber Risk Premium Pricing — Agentic AI Project
+# 🛡️ Cyber Risk Premium Pricing - Agentic AI Project
 
 **Guiding the Future of Cyber Insurance Pricing with AI**
 
