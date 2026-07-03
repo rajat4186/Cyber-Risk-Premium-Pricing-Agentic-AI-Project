@@ -23,7 +23,7 @@ homepage = st.Page(
 )
 
 data_validation_agent = st.Page(
-    page="pages/data_validation_agent_optimized.py", 
+    page="pages/1_DATA_VALIDATION_AGENT.py", 
     title="Data Validation Agent", 
     icon="✅"
 )
@@ -41,7 +41,7 @@ reinsurance_pricing_agent = st.Page(
 )
 
 reporting_agent = st.Page(
-    page="pages/FINAL_REPORTING.py", 
+    page="pages/4_REPORTING_AGENT.py", 
     title="Reporting Agent", 
     icon="📋"
 )
