@@ -160,4 +160,4 @@ This is an academic/practical capstone project built for the SSSIA AI Internship
 
 ## 📄 License
 
-Add your preferred license here (e.g., MIT).
+N/A
